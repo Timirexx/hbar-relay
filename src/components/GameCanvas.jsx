@@ -140,16 +140,33 @@ const GameCanvas = ({ gameState, onFlip }) => {
         ctx.fillText(state.score.toString().padStart(4, '0'), CANVAS_WIDTH / 2, 50);
         ctx.shadowBlur = 0;
 
-        if (!state.isActive && state.frame > 0) {
-            ctx.fillStyle = 'rgba(30, 27, 75, 0.9)';
+        if (!state.isActive) {
+            ctx.fillStyle = 'rgba(30, 27, 75, 0.85)';
             ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            ctx.fillStyle = ACCENT_PRIMARY;
             ctx.textAlign = 'center';
-            ctx.font = 'bold 32px "JetBrains Mono", monospace';
-            ctx.fillText('RELAY DISCONNECTED', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
-            ctx.font = '12px "JetBrains Mono", monospace';
-            ctx.fillStyle = '#F5F3FF';
-            ctx.fillText('RE-AUTHORIZE PACKET VIA HBAR TRANSFER', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 30);
+            
+            if (state.frame === 0) {
+                // Initial Start Screen
+                ctx.fillStyle = ACCENT_PRIMARY;
+                ctx.font = 'black 32px "JetBrains Mono", monospace';
+                ctx.fillText('ENGINE_IDLE', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 20);
+                
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(CANVAS_WIDTH / 2 - 100, CANVAS_HEIGHT / 2 + 10, 200, 40);
+                
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 14px "JetBrains Mono", monospace';
+                ctx.fillText('CLICK_TO_INITIALIZE', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 35);
+            } else {
+                // Game Over Screen
+                ctx.fillStyle = ACCENT_PRIMARY;
+                ctx.font = 'bold 32px "JetBrains Mono", monospace';
+                ctx.fillText('SIGNAL LOST', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+                ctx.font = '12px "JetBrains Mono", monospace';
+                ctx.fillStyle = '#F5F3FF';
+                ctx.fillText('RE-AUTHORIZE PACKET VIA HBAR TRANSFER', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 30);
+            }
         }
 
         requestRef.current = requestAnimationFrame(render);

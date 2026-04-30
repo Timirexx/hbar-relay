@@ -153,6 +153,18 @@ function App() {
         );
     }
 
+    const handleCanvasClick = () => {
+        if (!gameState.current.isActive) {
+            if (connected) {
+                handleStartGame();
+            } else {
+                connect();
+            }
+        } else {
+            flipGravity();
+        }
+    };
+
     return (
         <div className="min-h-screen bg-cyber-indigo text-soft-lilac p-4 md:p-8 font-mono relative crt-overlay overflow-hidden bg-data-stream">
             {/* Grain Texture Layer */}
@@ -207,7 +219,7 @@ function App() {
 
                     <GameCanvas 
                         gameState={gameState} 
-                        onFlip={flipGravity} 
+                        onFlip={handleCanvasClick} 
                     />
                 </div>
 
