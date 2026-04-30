@@ -1,0 +1,25 @@
+{
+  "name": "hbar-relay",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2",
+    "vite": "^8.0.10"
+  },
+  "dependencies": {
+    "@hashgraph/sdk": "^2.81.0",
+    "autoprefixer": "^10.5.0",
+    "axios": "^1.15.2",
+    "crypto-js": "^4.2.0",
+    "hashconnect": "^3.0.14",
+    "lucide-react": "^1.14.0",
+    "postcss": "^8.5.12",
+    "tailwindcss": "^4.2.4"
+  }
+}
