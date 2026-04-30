@@ -58,6 +58,13 @@ const GameCanvas = ({ gameState, onFlip }) => {
 
     const drawHUD = (ctx, state) => {
         const padding = 15;
+        // HUD Vibration effect based on gravity flip
+        const vibX = Math.sin(Date.now() / 50) * (state.velocity !== 0 ? 1 : 0.2);
+        const vibY = Math.cos(Date.now() / 50) * (state.velocity !== 0 ? 1 : 0.2);
+        
+        ctx.save();
+        ctx.translate(vibX, vibY);
+
         ctx.font = 'bold 9px "JetBrains Mono", monospace';
         ctx.textBaseline = 'top';
         ctx.fillStyle = ACCENT_PRIMARY;
@@ -80,6 +87,8 @@ const GameCanvas = ({ gameState, onFlip }) => {
         ctx.textAlign = 'right';
         ctx.fillStyle = ACCENT_SECONDARY;
         ctx.fillText(`VECTORS: ${state.gravityDir > 0 ? 'DOWNLINK' : 'UPLINK'}`, CANVAS_WIDTH - padding, CANVAS_HEIGHT - padding - 10);
+        
+        ctx.restore();
     };
 
     const render = useCallback(() => {
