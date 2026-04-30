@@ -1,36 +1,63 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  background-color: #000000;
-  color: #FFFFFF;
+@theme {
+  --color-signal-orange: #FF5F1F;
 }
 
-body {
-  margin: 0;
-  font-family: 'Courier New', Courier, monospace;
-  overflow: hidden;
+@layer base {
+  :root {
+    background-color: #000000;
+    color: #FFFFFF;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+    overflow-x: hidden;
+  }
 }
 
-.bg-halftone {
-  background-image: radial-gradient(rgba(255,255,255,0.1) 10%, transparent 11%), 
-                    radial-gradient(rgba(255,255,255,0.1) 10%, transparent 11%);
-  background-size: 8px 8px;
-  background-position: 0 0, 4px 4px;
-}
+@layer utilities {
+  .bg-halftone {
+    background-image: radial-gradient(rgba(255,255,255,0.1) 10%, transparent 11%), 
+                      radial-gradient(rgba(255,255,255,0.1) 10%, transparent 11%);
+    background-size: 8px 8px;
+    background-position: 0 0, 4px 4px;
+  }
 
-.brutalist-card {
-  @apply border-4 border-white bg-black p-6 relative;
-  box-shadow: 8px 8px 0px #FF5F1F;
-}
+  .brutalist-card {
+    border-width: 4px;
+    border-color: #FFFFFF;
+    background-color: #000000;
+    padding: 1.5rem;
+    position: relative;
+    box-shadow: 8px 8px 0px #FF5F1F;
+  }
 
-.brutalist-button {
-  @apply border-4 border-white bg-black text-white px-6 py-2 font-bold uppercase transition-all active:translate-x-1 active:translate-y-1 active:shadow-none;
-  box-shadow: 4px 4px 0px #FF5F1F;
-}
+  .brutalist-button {
+    border-width: 4px;
+    border-color: #FFFFFF;
+    background-color: #000000;
+    color: #FFFFFF;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition-property: all;
+    box-shadow: 4px 4px 0px #FF5F1F;
+  }
 
-.brutalist-button:disabled {
-  @apply opacity-50 cursor-not-allowed grayscale;
-  box-shadow: none;
+  .brutalist-button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px #FF5F1F;
+  }
+
+  .brutalist-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    box-shadow: none;
+  }
 }
