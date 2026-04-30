@@ -1,41 +1,28 @@
 @import "tailwindcss";
 
 @theme {
-  --color-signal-orange: #FF5F1F;
+  --color-cyber-indigo: #1E1B4B;
+  --color-electric-lavender: #C084FC;
+  --color-neon-violet: #A855F7;
+  --color-soft-lilac: #F5F3FF;
   --font-mono: "JetBrains Mono", "Roboto Mono", "Courier New", monospace;
   
-  @keyframes flicker {
-    0% { opacity: 0.98; }
-    50% { opacity: 1; }
-    100% { opacity: 0.99; }
+  @keyframes hue-pulse {
+    0% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(45deg); }
+    100% { filter: hue-rotate(0deg); }
   }
 
-  @keyframes scanline {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(100vh); }
-  }
-
-  @keyframes glitch {
-    0% { filter: invert(0); }
-    50% { filter: invert(1); }
-    100% { filter: invert(0); }
-  }
-
-  @keyframes pulse-fast {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  @keyframes matrix {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100%); }
+  @keyframes violet-pulse {
+    0%, 100% { box-shadow: 0 0 10px #A855F7, 0 0 20px #A855F7; }
+    50% { box-shadow: 0 0 20px #C084FC, 0 0 40px #C084FC; }
   }
 }
 
 @layer base {
   :root {
-    background-color: #000000;
-    color: #FFFFFF;
+    background-color: #1E1B4B;
+    color: #F5F3FF;
   }
 
   body {
@@ -47,7 +34,7 @@
 }
 
 @layer utilities {
-  /* CRT Scanlines */
+  /* CRT Scanlines - Tinted Purple */
   .crt-overlay::before {
     content: " ";
     display: block;
@@ -56,37 +43,49 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(168, 85, 247, 0.05) 50%), 
+                linear-gradient(90deg, rgba(168, 85, 247, 0.03), rgba(192, 132, 252, 0.02), rgba(168, 85, 247, 0.03));
     z-index: 50;
     background-size: 100% 4px, 3px 100%;
     pointer-events: none;
     animation: flicker 0.01s steps(2) infinite;
   }
 
-  /* Grain Texture */
-  .bg-grain {
-    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
-    filter: contrast(150%) brightness(1000%);
-    opacity: 0.05;
+  /* Neon Violet Halftone */
+  .bg-halftone {
+    background-image: radial-gradient(rgba(168, 85, 247, 0.1) 10%, transparent 11%), 
+                      radial-gradient(rgba(168, 85, 247, 0.1) 10%, transparent 11%);
+    background-size: 8px 8px;
+    background-position: 0 0, 4px 4px;
   }
 
-  /* Mechanical Shifting Buttons */
+  /* Cyber-Violet Brutalist Card */
+  .brutalist-card {
+    border-width: 4px;
+    border-color: #C084FC;
+    background-color: rgba(30, 27, 75, 0.8);
+    padding: 1.5rem;
+    position: relative;
+    box-shadow: 8px 8px 0px #A855F7;
+    backdrop-filter: blur(8px);
+  }
+
+  /* Mechanical Violet Buttons */
   .btn-mechanical {
-    @apply relative border-4 border-white bg-black text-white px-6 py-3 font-bold uppercase transition-all;
-    box-shadow: 0px 0px 0px #FF5F1F;
+    @apply relative border-4 border-electric-lavender bg-cyber-indigo text-soft-lilac px-6 py-3 font-bold uppercase transition-all;
+    box-shadow: 0px 0px 0px #A855F7;
     transform: translate(0, 0);
   }
 
   .btn-mechanical:hover {
     transform: translate(-4px, -4px);
-    box-shadow: 4px 4px 0px #FF5F1F;
+    box-shadow: 4px 4px 0px #A855F7;
   }
 
   .btn-mechanical:active {
-    animation: glitch 0.1s steps(1) 1;
+    animation: hue-pulse 0.5s steps(10) 1;
     transform: translate(0, 0);
-    box-shadow: 0px 0px 0px #FF5F1F;
+    box-shadow: 0px 0px 0px #A855F7;
   }
 
   .btn-mechanical:disabled {
@@ -95,21 +94,14 @@
     box-shadow: none;
   }
 
-  /* Terminal Scroll */
   .terminal-feed {
-    @apply bg-black/80 border-2 border-white/20 p-4 font-mono text-[10px] leading-tight overflow-y-auto;
+    @apply bg-cyber-indigo/80 border-2 border-electric-lavender/30 p-4 font-mono text-[10px] leading-tight overflow-y-auto text-electric-lavender;
     scrollbar-width: thin;
-    scrollbar-color: #FF5F1F #000000;
+    scrollbar-color: #A855F7 #1E1B4B;
   }
 
-  /* Matrix Animation Layer */
-  .matrix-layer {
-    @apply absolute inset-0 overflow-hidden pointer-events-none opacity-40;
-    mask-image: linear-gradient(to bottom, transparent, black, transparent);
-  }
-
-  .matrix-char {
-    @apply text-signal-orange text-[8px] absolute;
-    animation: matrix 1.5s steps(20) infinite;
+  /* Pulse Animation Utility */
+  .animate-hue {
+    animation: hue-pulse 0.5s steps(10) 1;
   }
 }

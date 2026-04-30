@@ -2,35 +2,52 @@ import React, { useRef, useEffect, useCallback, useState } from 'react';
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
-const ACCENT_COLOR = '#FF5F1F'; // Signal Orange
+const ACCENT_PRIMARY = '#C084FC'; // Electric Lavender
+const ACCENT_SECONDARY = '#A855F7'; // Neon Violet
+const BG_COLOR = '#1E1B4B'; // Cyber Indigo
 
 const GameCanvas = ({ gameState, onFlip }) => {
     const canvasRef = useRef(null);
     const requestRef = useRef();
     const [binaryString, setBinaryString] = useState("10101010110");
+    const glowRef = useRef(0);
 
-    // Binary update for HUD
     useEffect(() => {
         const interval = setInterval(() => {
             setBinaryString(Math.random().toString(2).substring(2, 12));
+            glowRef.current = (glowRef.current + 1) % 100;
         }, 100);
         return () => clearInterval(interval);
     }, []);
 
     const drawSlab = (ctx, x, y, width, height) => {
-        ctx.fillStyle = '#000000';
+        // Neon Pulse Glow
+        const glowSize = 10 + Math.sin(Date.now() / 200) * 5;
+        ctx.shadowBlur = glowSize;
+        ctx.shadowColor = ACCENT_SECONDARY;
+
+        // Gradient Slab
+        const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
+        gradient.addColorStop(0, ACCENT_PRIMARY);
+        gradient.addColorStop(1, ACCENT_SECONDARY);
+        
+        ctx.fillStyle = gradient;
         ctx.fillRect(x, y, width, height);
+        
         ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 2;
         ctx.strokeRect(x, y, width, height);
 
-        // Hatching (Rebar)
+        // Reset Shadow for other elements
+        ctx.shadowBlur = 0;
+
+        // Hatching
         ctx.save();
         ctx.beginPath();
         ctx.rect(x, y, width, height);
         ctx.clip();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1;
         for (let i = -height; i < width + height; i += 10) {
             ctx.moveTo(x + i, y);
             ctx.lineTo(x + i + height, y + height);
@@ -43,30 +60,26 @@ const GameCanvas = ({ gameState, onFlip }) => {
         const padding = 15;
         ctx.font = 'bold 9px "JetBrains Mono", monospace';
         ctx.textBaseline = 'top';
-        ctx.fillStyle = ACCENT_COLOR;
+        ctx.fillStyle = ACCENT_PRIMARY;
 
-        // TOP-LEFT: SYSTEM_STATUS
         ctx.textAlign = 'left';
-        ctx.fillText(`SYSTEM_STATUS: ${state.isActive ? 'ACTIVE' : 'IDLE'}`, padding, padding);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(`BIN_STR: ${binaryString}`, padding, padding + 12);
+        ctx.fillText(`SYSTEM_STATUS: ${state.isActive ? 'ONLINE' : 'STANDBY'}`, padding, padding);
+        ctx.fillStyle = '#F5F3FF';
+        ctx.fillText(`STREAM: ${binaryString}`, padding, padding + 12);
 
-        // TOP-RIGHT: GAS_FEE
         ctx.textAlign = 'right';
-        ctx.fillStyle = ACCENT_COLOR;
-        ctx.fillText(`GAS_FEE: 1000 tHBAR`, CANVAS_WIDTH - padding, padding);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(`NET: HEDERA_TESTNET`, CANVAS_WIDTH - padding, padding + 12);
+        ctx.fillStyle = ACCENT_PRIMARY;
+        ctx.fillText(`GAS: 1000 tHBAR`, CANVAS_WIDTH - padding, padding);
+        ctx.fillStyle = '#F5F3FF';
+        ctx.fillText(`DOMAIN: VIOLET_SECTOR`, CANVAS_WIDTH - padding, padding + 12);
 
-        // BOTTOM-LEFT: RELAY_ID
         ctx.textAlign = 'left';
-        ctx.fillStyle = ACCENT_COLOR;
+        ctx.fillStyle = ACCENT_SECONDARY;
         ctx.fillText(`RELAY_ID: ${import.meta.env.VITE_HCS_TOPIC_ID}`, padding, CANVAS_HEIGHT - padding - 10);
 
-        // BOTTOM-RIGHT: ALTITUDE_LOCK
         ctx.textAlign = 'right';
-        ctx.fillStyle = ACCENT_COLOR;
-        ctx.fillText(`ALTITUDE_LOCK: ${state.gravityDir > 0 ? 'GROUND' : 'CEILING'}`, CANVAS_WIDTH - padding, CANVAS_HEIGHT - padding - 10);
+        ctx.fillStyle = ACCENT_SECONDARY;
+        ctx.fillText(`VECTORS: ${state.gravityDir > 0 ? 'DOWNLINK' : 'UPLINK'}`, CANVAS_WIDTH - padding, CANVAS_HEIGHT - padding - 10);
     };
 
     const render = useCallback(() => {
@@ -77,61 +90,57 @@ const GameCanvas = ({ gameState, onFlip }) => {
 
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        // Grid Background (Subtle)
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        // Cyber Grid
+        ctx.strokeStyle = 'rgba(168, 85, 247, 0.15)';
         ctx.lineWidth = 1;
         for (let x = 0; x < CANVAS_WIDTH; x += 40) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, CANVAS_HEIGHT);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke();
         }
         for (let y = 0; y < CANVAS_HEIGHT; y += 40) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(CANVAS_WIDTH, y);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_WIDTH, y); ctx.stroke();
         }
 
-        // Draw Obstacles
+        // Obstacles (Neon detaling)
         state.obstacles.forEach(obs => {
-            ctx.fillStyle = '#FFFFFF';
+            ctx.fillStyle = '#F5F3FF';
             ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-            ctx.strokeStyle = ACCENT_COLOR;
-            ctx.lineWidth = 2;
-            ctx.strokeRect(obs.x + 4, obs.y + 4, obs.width - 8, obs.height - 8);
+            ctx.strokeStyle = ACCENT_SECONDARY;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(obs.x + 2, obs.y + 2, obs.width - 4, obs.height - 4);
         });
 
-        // Draw Player
+        // Player
         const runnerX = 100;
         drawSlab(ctx, runnerX, state.runnerY, 60, 20);
         
-        // Runner Silhouette
-        ctx.fillStyle = ACCENT_COLOR;
-        ctx.fillRect(runnerX + 20, state.runnerY - 30, 20, 30);
+        // Runner (Lavender Glow)
+        ctx.fillStyle = ACCENT_PRIMARY;
+        ctx.fillRect(runnerX + 22, state.runnerY - 32, 16, 32);
         ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(runnerX + 20, state.runnerY - 30, 20, 30);
+        ctx.lineWidth = 1;
+        ctx.strokeRect(runnerX + 22, state.runnerY - 32, 16, 32);
 
-        // Draw HUD
         drawHUD(ctx, state);
 
-        // Score Overlay
-        ctx.fillStyle = '#FFFFFF';
+        // Score
+        ctx.fillStyle = '#F5F3FF';
         ctx.textAlign = 'center';
         ctx.font = 'black 48px "JetBrains Mono", monospace';
-        ctx.fillText(state.score.toString().padStart(4, '0'), CANVAS_WIDTH / 2, 40);
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = ACCENT_PRIMARY;
+        ctx.fillText(state.score.toString().padStart(4, '0'), CANVAS_WIDTH / 2, 50);
+        ctx.shadowBlur = 0;
 
         if (!state.isActive && state.frame > 0) {
-            ctx.fillStyle = 'rgba(0,0,0,0.8)';
+            ctx.fillStyle = 'rgba(30, 27, 75, 0.9)';
             ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            ctx.fillStyle = ACCENT_COLOR;
+            ctx.fillStyle = ACCENT_PRIMARY;
             ctx.textAlign = 'center';
             ctx.font = 'bold 32px "JetBrains Mono", monospace';
-            ctx.fillText('SIGNAL LOST', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+            ctx.fillText('RELAY DISCONNECTED', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
             ctx.font = '12px "JetBrains Mono", monospace';
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillText('ENCRYPTED PACKET TRANSMISSION REQUIRED', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 30);
+            ctx.fillStyle = '#F5F3FF';
+            ctx.fillText('RE-AUTHORIZE PACKET VIA HBAR TRANSFER', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 30);
         }
 
         requestRef.current = requestAnimationFrame(render);
@@ -150,15 +159,14 @@ const GameCanvas = ({ gameState, onFlip }) => {
     }, [render]);
 
     return (
-        <div className="relative w-full aspect-video border-4 border-white bg-black overflow-hidden cursor-pointer group" 
+        <div className="relative w-full aspect-video border-4 border-electric-lavender bg-cyber-indigo overflow-hidden cursor-pointer group shadow-[0_0_30px_rgba(168,85,247,0.3)]" 
              onClick={onFlip}>
             <canvas
                 ref={canvasRef}
                 style={{ width: '100%', height: '100%' }}
                 className="block"
             />
-            {/* Vignette Overlay */}
-            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]"></div>
+            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_100px_rgba(168,85,247,0.2)]"></div>
         </div>
     );
 };

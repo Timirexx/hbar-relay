@@ -25,7 +25,6 @@ function App() {
     const [isGameOver, setIsGameOver] = useState(false);
     const [starCount, setStarCount] = useState(0);
 
-    // Initial load for star count from localStorage (simulated HTS cache)
     useEffect(() => {
         const savedStars = localStorage.getItem('star_count') || "0";
         setStarCount(parseInt(savedStars));
@@ -38,7 +37,7 @@ function App() {
 
     useEffect(() => {
         refreshLeaderboard();
-        const interval = setInterval(refreshLeaderboard, 15000); // 15s refresh for higher fidelity
+        const interval = setInterval(refreshLeaderboard, 15000);
         return () => clearInterval(interval);
     }, [refreshLeaderboard]);
 
@@ -108,24 +107,25 @@ function App() {
     }, [flipGravity]);
 
     return (
-        <div className="min-h-screen bg-black text-white p-4 md:p-8 font-mono relative crt-overlay overflow-hidden">
-            {/* Grain Texture Layer */}
+        <div className="min-h-screen bg-cyber-indigo text-soft-lilac p-4 md:p-8 font-mono relative crt-overlay overflow-hidden">
+            {/* Violet Halftone Layer */}
+            <div className="fixed inset-0 bg-halftone opacity-40 pointer-events-none z-0"></div>
             <div className="fixed inset-0 bg-grain pointer-events-none z-[100]"></div>
             
             {/* Header */}
             <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 relative z-20">
                 <div className="flex items-center gap-6">
-                    <div className="bg-signal-orange p-4 border-4 border-white shadow-[6px_6px_0px_#FFFFFF] -rotate-2">
-                        <Zap size={40} className="text-black" fill="currentColor" />
+                    <div className="bg-electric-lavender p-4 border-4 border-white shadow-[6px_6px_0px_#A855F7] -rotate-1 animate-pulse">
+                        <Zap size={40} className="text-cyber-indigo" fill="currentColor" />
                     </div>
                     <div>
-                        <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none">
+                        <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none text-white drop-shadow-[0_0_15px_#A855F7]">
                             HBAR_RELAY
                         </h1>
                         <div className="flex items-center gap-2 mt-2">
-                            <Activity size={14} className="text-signal-orange animate-pulse" />
-                            <p className="text-[10px] text-white opacity-40 font-mono tracking-[0.3em] uppercase">
-                                Signal_Runner_Protocol // v1.0.8_High_Fidelity
+                            <Activity size={14} className="text-neon-violet animate-pulse" />
+                            <p className="text-[10px] text-electric-lavender opacity-60 font-mono tracking-[0.3em] uppercase">
+                                Signal_Runner_Protocol // v1.2.0_Violet_Cyber
                             </p>
                         </div>
                     </div>
@@ -143,11 +143,11 @@ function App() {
             {/* Main Area */}
             <main className="max-w-7xl mx-auto relative z-20">
                 <div className="relative group">
-                    {/* Industrial Frame Decor */}
-                    <div className="absolute -top-4 -left-4 w-8 h-8 border-t-4 border-l-4 border-signal-orange"></div>
-                    <div className="absolute -top-4 -right-4 w-8 h-8 border-t-4 border-r-4 border-signal-orange"></div>
-                    <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-4 border-l-4 border-signal-orange"></div>
-                    <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-4 border-r-4 border-signal-orange"></div>
+                    {/* Violet Frame Decor */}
+                    <div className="absolute -top-4 -left-4 w-12 h-12 border-t-4 border-l-4 border-electric-lavender shadow-[-4px_-4px_0_#A855F7]"></div>
+                    <div className="absolute -top-4 -right-4 w-12 h-12 border-t-4 border-r-4 border-electric-lavender shadow-[4px_-4px_0_#A855F7]"></div>
+                    <div className="absolute -bottom-4 -left-4 w-12 h-12 border-b-4 border-l-4 border-electric-lavender shadow-[-4px_4px_0_#A855F7]"></div>
+                    <div className="absolute -bottom-4 -right-4 w-12 h-12 border-b-4 border-r-4 border-electric-lavender shadow-[4px_4px_0_#A855F7]"></div>
 
                     <GameCanvas 
                         gameState={gameState} 
@@ -166,11 +166,11 @@ function App() {
                 />
             </main>
 
-            <footer className="max-w-7xl mx-auto mt-20 flex justify-between items-end opacity-20 text-[9px] uppercase font-mono tracking-widest border-t border-white/10 pt-4">
-                <div>[ SCAN_SECTOR: 0xFF12 // MIRROR_SYNC: OK ]</div>
+            <footer className="max-w-7xl mx-auto mt-20 flex justify-between items-end opacity-20 text-[9px] uppercase font-mono tracking-widest border-t border-electric-lavender/20 pt-4 text-electric-lavender">
+                <div>[ SCAN_SECTOR: VIOLET_00 // SYNC: ENCRYPTED ]</div>
                 <div className="text-right">
-                    MONOLITH_SLAB_IND_RELAY<br />
-                    TRUSTLESS_DATA_EXTRACTION_ACTIVE
+                    VIOLET_RELAY_INTERFACE<br />
+                    DATA_EXTRACT_PROTOCOL_ACTIVE
                 </div>
             </footer>
         </div>
