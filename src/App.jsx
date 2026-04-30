@@ -4,7 +4,7 @@ import { useGameLoop } from './hooks/useGameLoop';
 import GameCanvas from './components/GameCanvas';
 import TerminalUI from './components/TerminalUI';
 import WalletConnect from './components/WalletConnect';
-import { Zap } from 'lucide-react';
+import { Zap, Activity } from 'lucide-react';
 
 function App() {
     const { 
@@ -23,8 +23,14 @@ function App() {
     const [leaderboard, setLeaderboard] = useState([]);
     const [isPaying, setIsPaying] = useState(false);
     const [isGameOver, setIsGameOver] = useState(false);
+    const [starCount, setStarCount] = useState(0);
 
-    // Leaderboard refresh
+    // Initial load for star count from localStorage (simulated HTS cache)
+    useEffect(() => {
+        const savedStars = localStorage.getItem('star_count') || "0";
+        setStarCount(parseInt(savedStars));
+    }, []);
+
     const refreshLeaderboard = useCallback(async () => {
         const data = await fetchLeaderboard();
         setLeaderboard(data);
@@ -32,13 +38,12 @@ function App() {
 
     useEffect(() => {
         refreshLeaderboard();
-        const interval = setInterval(refreshLeaderboard, 30000); // 30s refresh
+        const interval = setInterval(refreshLeaderboard, 15000); // 15s refresh for higher fidelity
         return () => clearInterval(interval);
     }, [refreshLeaderboard]);
 
     const handleGameOver = useCallback((finalScore) => {
         setIsGameOver(true);
-        // Report to HCS
         if (finalScore > 0) {
             reportScore(finalScore).then(() => {
                 refreshLeaderboard();
@@ -62,7 +67,6 @@ function App() {
             resetGame();
         } catch (error) {
             console.error("Payment failed", error);
-            alert("Payment Required to Relay: " + error.message);
         } finally {
             setIsPaying(false);
         }
@@ -72,16 +76,16 @@ function App() {
         try {
             const success = await claimDailyStars();
             if (success) {
+                const newCount = starCount + 50;
+                setStarCount(newCount);
+                localStorage.setItem('star_count', newCount.toString());
                 localStorage.setItem('last_star_claim', Date.now().toString());
-                alert("50 STARS CLAIMED ON-CHAIN");
             }
         } catch (error) {
-            alert(error.message);
+            console.error(error.message);
         }
     };
 
-    // Game loop tick handled by Canvas, but we could trigger physics here if we wanted
-    // However, GameCanvas uses requestAnimationFrame with gameState.current
     useEffect(() => {
         let frameId;
         const tick = () => {
@@ -92,7 +96,6 @@ function App() {
         return () => cancelAnimationFrame(frameId);
     }, [update]);
 
-    // Keyboard Listener
     useEffect(() => {
         const handleKey = (e) => {
             if (e.code === 'Space') {
@@ -105,23 +108,26 @@ function App() {
     }, [flipGravity]);
 
     return (
-        <div className="min-h-screen bg-black text-white p-4 md:p-8 font-mono relative overflow-hidden">
-            {/* Background Texture */}
-            <div className="fixed inset-0 bg-halftone opacity-5 pointer-events-none"></div>
-
+        <div className="min-h-screen bg-black text-white p-4 md:p-8 font-mono relative crt-overlay overflow-hidden">
+            {/* Grain Texture Layer */}
+            <div className="fixed inset-0 bg-grain pointer-events-none z-[100]"></div>
+            
             {/* Header */}
-            <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center mb-12 gap-6 relative z-10">
-                <div className="flex items-center gap-4">
-                    <div className="bg-signal-orange p-3 border-4 border-white rotate-3">
-                        <Zap size={32} className="text-black" fill="currentColor" />
+            <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 relative z-20">
+                <div className="flex items-center gap-6">
+                    <div className="bg-signal-orange p-4 border-4 border-white shadow-[6px_6px_0px_#FFFFFF] -rotate-2">
+                        <Zap size={40} className="text-black" fill="currentColor" />
                     </div>
                     <div>
-                        <h1 className="text-4xl md:text-6xl font-black italic tracking-tighter">
-                            HBAR RELAY
+                        <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none">
+                            HBAR_RELAY
                         </h1>
-                        <p className="text-xs text-signal-orange font-bold uppercase tracking-widest">
-                            Signal Runner Protocol // TestNet_v1
-                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                            <Activity size={14} className="text-signal-orange animate-pulse" />
+                            <p className="text-[10px] text-white opacity-40 font-mono tracking-[0.3em] uppercase">
+                                Signal_Runner_Protocol // v1.0.8_High_Fidelity
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -134,12 +140,20 @@ function App() {
                 />
             </header>
 
-            {/* Main Game Area */}
-            <main className="max-w-6xl mx-auto relative z-10">
-                <GameCanvas 
-                    gameState={gameState} 
-                    onFlip={flipGravity} 
-                />
+            {/* Main Area */}
+            <main className="max-w-7xl mx-auto relative z-20">
+                <div className="relative group">
+                    {/* Industrial Frame Decor */}
+                    <div className="absolute -top-4 -left-4 w-8 h-8 border-t-4 border-l-4 border-signal-orange"></div>
+                    <div className="absolute -top-4 -right-4 w-8 h-8 border-t-4 border-r-4 border-signal-orange"></div>
+                    <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-4 border-l-4 border-signal-orange"></div>
+                    <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-4 border-r-4 border-signal-orange"></div>
+
+                    <GameCanvas 
+                        gameState={gameState} 
+                        onFlip={flipGravity} 
+                    />
+                </div>
 
                 <TerminalUI 
                     score={gameScore}
@@ -148,15 +162,15 @@ function App() {
                     connected={connected}
                     isPaying={isPaying}
                     leaderboard={leaderboard}
+                    starCount={starCount}
                 />
             </main>
 
-            {/* Footer Decals */}
-            <footer className="max-w-6xl mx-auto mt-12 flex justify-between items-end opacity-20 text-[10px] uppercase font-bold tracking-widest">
-                <div>[ SCANNING_SECTOR_00 ]</div>
+            <footer className="max-w-7xl mx-auto mt-20 flex justify-between items-end opacity-20 text-[9px] uppercase font-mono tracking-widest border-t border-white/10 pt-4">
+                <div>[ SCAN_SECTOR: 0xFF12 // MIRROR_SYNC: OK ]</div>
                 <div className="text-right">
-                    PROPERTY OF THE MONOLITH SLAB<br />
-                    UNAUTHORIZED ACCESS WILL BE RELAYED
+                    MONOLITH_SLAB_IND_RELAY<br />
+                    TRUSTLESS_DATA_EXTRACTION_ACTIVE
                 </div>
             </footer>
         </div>
