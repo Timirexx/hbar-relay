@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@vitejs/plugin-react-swc": "^4.3.0",
     "typescript": "~6.0.2",
     "vite": "^8.0.10"
   },
@@ -20,6 +21,8 @@
     "hashconnect": "^3.0.14",
     "lucide-react": "^1.14.0",
     "postcss": "^8.5.12",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "tailwindcss": "^4.2.4"
   }
 }
