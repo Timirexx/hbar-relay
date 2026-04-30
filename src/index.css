@@ -90,7 +90,7 @@
   }
 
   .btn-mechanical:disabled {
-    @apply opacity-30 cursor-not-allowed filter-grayscale;
+    @apply opacity-30 cursor-not-allowed grayscale;
     transform: none;
     box-shadow: none;
   }
