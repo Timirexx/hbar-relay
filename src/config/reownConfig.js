@@ -1,4 +1,3 @@
-import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { hederaTestnet } from '@reown/appkit/networks';
 
@@ -12,28 +11,4 @@ export const networks = [hederaTestnet];
 export const wagmiAdapter = new WagmiAdapter({
     projectId,
     networks
-});
-
-// 4. Initialize AppKit with detailed metadata for standard compliance
-export const appkit = createAppKit({
-    adapters: [wagmiAdapter],
-    networks: [hederaTestnet],
-    defaultNetwork: hederaTestnet,
-    projectId,
-    metadata: {
-        name: 'HBAR RELAY',
-        description: 'Standard Protocol Node',
-        url: 'https://hbar-relay.vercel.app',
-        icons: ['https://avatars.githubusercontent.com/u/179229932']
-    },
-    features: {
-        analytics: false,
-        email: false,
-        socials: []
-    },
-    themeMode: 'dark',
-    themeVariables: {
-        '--w3m-accent': '#C084FC',
-        '--w3m-z-index': 99999
-    }
 });
