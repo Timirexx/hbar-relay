@@ -115,8 +115,9 @@ function AppContent() {
     if (isBooting) {
         return (
             <div className="fixed inset-0 bg-[#000000] flex items-center justify-center z-[10000]">
-                <div className="text-[#C084FC] font-black tracking-[0.5em] animate-pulse uppercase">
-                    Initializing_Uplink_v3.1
+                <div className="text-[#C084FC] font-black tracking-[0.5em] animate-pulse uppercase text-center">
+                    Initializing_Uplink_v3.5<br/>
+                    <span className="text-[10px] opacity-40">HEDERA_TESTNET_NODE_ACTIVE</span>
                 </div>
             </div>
         );
@@ -133,7 +134,7 @@ function AppContent() {
                     </div>
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-none text-white">HBAR_RELAY</h1>
-                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">TRANSACTIONAL_UPLINK_v3.1</p>
+                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">[TESTNET_UPLINK_v3.5]</p>
                     </div>
                 </div>
 

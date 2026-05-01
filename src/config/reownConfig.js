@@ -5,7 +5,7 @@ import { hederaTestnet } from '@reown/appkit/networks';
 // 1. Get Project ID
 export const projectId = import.meta.env.VITE_REOWN_PROJECT_ID;
 
-// 2. Define Networks
+// 2. Strictly Testnet Only
 export const networks = [hederaTestnet];
 
 // 3. Create Wagmi Adapter
@@ -17,16 +17,19 @@ export const wagmiAdapter = new WagmiAdapter({
 // 4. Initialize AppKit
 export const appkit = createAppKit({
     adapters: [wagmiAdapter],
-    networks,
+    networks, // Strictly single network
+    defaultNetwork: hederaTestnet, // Force testnet as default
     projectId,
     metadata: {
-        name: 'HBAR RELAY',
-        description: 'Brutalist 2D dApp Relay',
+        name: 'HBAR RELAY [TESTNET]',
+        description: 'Brutalist 2D dApp Relay - Testnet Node',
         url: 'https://hbar-relay.vercel.app',
         icons: ['https://www.hashpack.app/img/logo.svg']
     },
     features: {
-        analytics: false
+        analytics: false,
+        email: false, // Keep it focused on hardware wallets
+        socials: []
     },
     themeMode: 'dark',
     themeVariables: {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Wallet, ShieldCheck, Box } from 'lucide-react';
+import { X, ShieldCheck } from 'lucide-react';
 
 const WalletChoiceModal = ({ isOpen, onClose, onSelectEVM, onSelectNative }) => {
     if (!isOpen) return null;
@@ -8,81 +8,86 @@ const WalletChoiceModal = ({ isOpen, onClose, onSelectEVM, onSelectNative }) => 
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div 
-                className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"
+                className="absolute inset-0 bg-black/85 backdrop-blur-xl transition-opacity"
                 onClick={onClose}
-            ></div>
+            />
 
-            {/* Modal Content */}
-            <div className="relative w-full max-w-md bg-gradient-to-br from-[#2D1B4E]/90 to-[#140A23]/95 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            {/* Modal Card */}
+            <div className="relative bg-[#1A1025] border border-[#C084FC]/30 w-full max-w-md rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.8),0_0_50px_rgba(192,132,252,0.1)] overflow-hidden animate-slide-down">
                 
                 {/* Header */}
-                <div className="p-8 flex justify-between items-center border-b border-white/5">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-light-purple/10 flex items-center justify-center text-light-purple shadow-[0_0_15px_rgba(168,85,247,0.3)]">
-                            <Wallet size={24} />
+                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-gradient-to-b from-white/5 to-transparent">
+                    <div>
+                        <h2 className="text-2xl font-black italic tracking-tighter uppercase text-white">UPLINK_CHOICE</h2>
+                        <div className="flex items-center gap-2 mt-1">
+                            <ShieldCheck size={12} className="text-[#C084FC]" />
+                            <span className="text-[10px] font-bold text-[#C084FC] tracking-[0.2em] uppercase">HEDERA_TESTNET_ONLY</span>
                         </div>
-                        <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">Select_Uplink</h2>
                     </div>
                     <button 
                         onClick={onClose}
-                        className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white/60 hover:text-white transition-all shadow-carved"
+                        className="p-3 rounded-2xl hover:bg-white/5 text-white/40 hover:text-white transition-all"
                     >
-                        <X size={18} />
+                        <X size={24} />
                     </button>
                 </div>
 
-                {/* Options Grid */}
+                {/* Body */}
                 <div className="p-8 flex flex-col gap-4">
                     
-                    {/* OPTION A: EVM */}
+                    {/* OPTION A: METAMASK (EVM) */}
                     <button 
                         onClick={() => {
                             onSelectEVM();
                             onClose();
                         }}
-                        className="group relative flex items-center gap-4 p-6 rounded-2xl bg-black/20 border border-white/5 shadow-tactile hover:bg-light-purple/10 hover:border-light-purple/30 transition-all text-left"
+                        className="group relative flex items-center gap-6 p-6 rounded-3xl bg-[#2D1B4E]/40 border border-white/5 hover:border-[#F6851B]/50 transition-all duration-300 text-left overflow-hidden"
                     >
-                        <div className="w-12 h-12 rounded-xl bg-[#627EEA]/20 flex items-center justify-center text-[#627EEA]">
-                            <Box size={28} />
+                        {/* Brand Glow */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#F6851B]/5 blur-3xl group-hover:bg-[#F6851B]/20 transition-all"></div>
+                        
+                        <div className="w-16 h-16 rounded-2xl bg-[#F6851B]/10 flex items-center justify-center border border-[#F6851B]/20 shadow-inner group-hover:scale-110 transition-transform">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" className="w-10 h-10 drop-shadow-[0_4px_8px_rgba(246,133,27,0.3)]" />
                         </div>
-                        <div className="flex-1">
-                            <h3 className="font-black italic uppercase text-xs tracking-widest text-white group-hover:text-light-purple">MetaMask / EVM</h3>
-                            <p className="text-[10px] text-white/40 mt-1">Connect via Reown AppKit protocol</p>
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ShieldCheck size={16} className="text-light-purple" />
+                        
+                        <div className="flex flex-col">
+                            <span className="text-lg font-black text-white">METAMASK</span>
+                            <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase mt-1">EVM_PROTOCOL // ETHEREUM_MODE</span>
                         </div>
                     </button>
 
-                    {/* OPTION B: NATIVE */}
+                    {/* OPTION B: HASHPACK (NATIVE) */}
                     <button 
                         onClick={() => {
                             onSelectNative();
                             onClose();
                         }}
-                        className="group relative flex items-center gap-4 p-6 rounded-2xl bg-black/20 border border-white/5 shadow-tactile hover:bg-light-purple/10 hover:border-light-purple/30 transition-all text-left"
+                        className="group relative flex items-center gap-6 p-6 rounded-3xl bg-[#2D1B4E]/40 border border-white/5 hover:border-[#D15C22]/50 transition-all duration-300 text-left overflow-hidden"
                     >
-                        <div className="w-12 h-12 rounded-xl bg-light-purple/20 flex items-center justify-center text-light-purple">
-                            <Zap size={28} fill="currentColor" />
+                        {/* Brand Glow */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#D15C22]/5 blur-3xl group-hover:bg-[#D15C22]/20 transition-all"></div>
+
+                        <div className="w-16 h-16 rounded-2xl bg-[#D15C22]/10 flex items-center justify-center border border-[#D15C22]/20 shadow-inner group-hover:scale-110 transition-transform">
+                            <img src="https://www.hashpack.app/img/logo.svg" alt="HashPack" className="w-10 h-10 brightness-110 drop-shadow-[0_4px_8px_rgba(209,92,34,0.3)]" />
                         </div>
-                        <div className="flex-1">
-                            <h3 className="font-black italic uppercase text-xs tracking-widest text-white group-hover:text-light-purple">HashPack / Native</h3>
-                            <p className="text-[10px] text-white/40 mt-1">Direct Hedera 0.0.xxx connection</p>
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ShieldCheck size={16} className="text-light-purple" />
+
+                        <div className="flex flex-col">
+                            <span className="text-lg font-black text-white">HASHPACK</span>
+                            <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase mt-1">HEDERA_NATIVE // 0.0.XXX_MODE</span>
                         </div>
                     </button>
 
                 </div>
 
-                <div className="p-4 bg-black/20 text-[8px] font-bold text-center opacity-20 tracking-[1em] uppercase">
-                    Protocol_Handshake_Ready
+                {/* Footer Tip */}
+                <div className="p-6 bg-black/40 border-t border-white/5 text-center">
+                    <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em]">
+                        Ensure your wallet is toggled to TESTNET mode before connecting.
+                    </p>
                 </div>
             </div>
         </div>
     );
 };
 
-import { Zap } from 'lucide-react';
 export default WalletChoiceModal;
