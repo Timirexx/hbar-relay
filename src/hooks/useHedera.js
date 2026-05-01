@@ -55,12 +55,17 @@ export const useHedera = () => {
     }, []);
 
     const connect = useCallback(async () => {
-        if (!hcData) return;
+        if (!hcData) {
+            console.warn("UPLINK // HASHPACK_NOT_READY // RETRYING_INIT");
+            return;
+        }
         setIsConnecting(true);
+        console.log("UPLINK // INITIATING_HASHPACK_HANDSHAKE");
         try {
-            hashconnect.current.connectToLocalWallet();
+            // Priority 1: Direct Extension Handshake
+            await hashconnect.current.connectToLocalWallet();
         } catch (error) {
-            console.error("Connection failed", error);
+            console.error("UPLINK // HASHPACK_PAIRING_FAILED", error);
         } finally {
             setIsConnecting(false);
         }

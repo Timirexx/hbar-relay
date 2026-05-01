@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
-console.log("HBAR_RELAY // MAIN_ENTRY_POINT_LOADED");
+// IMPORTANT: Initialize AppKit Engine at the absolute root to prevent popup blocking
+import './config/appkit'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
