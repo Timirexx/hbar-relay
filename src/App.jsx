@@ -166,19 +166,21 @@ function App() {
     };
 
     return (
-        <div className="min-h-screen bg-cyber-indigo text-soft-lilac p-4 md:p-8 font-mono relative crt-overlay overflow-hidden bg-data-stream">
-            {/* Grain Texture Layer */}
+        <div className="min-h-screen bg-cyber-indigo text-soft-lilac p-4 md:p-8 font-mono relative crt-overlay overflow-hidden perspective-container">
+            {/* 3D Environment Layers */}
+            <div className="bg-3d-grid"></div>
+            <div className="fixed inset-0 bg-data-stream opacity-40 pointer-events-none z-0"></div>
             <div className="fixed inset-0 bg-grain pointer-events-none z-[100]"></div>
             
             {/* Header */}
             <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 relative z-20">
                 <div className="flex items-center gap-6 group">
-                    <div className="bg-electric-lavender p-4 border-4 border-white shadow-[6px_6px_0px_#A855F7] -rotate-1 relative transition-transform group-hover:rotate-0">
+                    <div className="bg-electric-lavender p-4 border-4 border-white shadow-[6px_6px_0px_#A855F7] -rotate-1 relative transition-transform group-hover:rotate-0 floating-3d">
                         <Zap size={40} className="text-cyber-indigo" fill="currentColor" />
                         <div className="hardware-corner hardware-corner-tl !-top-2 !-left-2"></div>
                         <div className="hardware-corner hardware-corner-br !-bottom-2 !-right-2"></div>
                     </div>
-                    <div>
+                    <div className="card-3d-tilt">
                         <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none text-white drop-shadow-[0_0_15px_#A855F7] text-glitch">
                             HBAR_RELAY
                         </h1>
@@ -191,18 +193,20 @@ function App() {
                     </div>
                 </div>
 
-                <WalletConnect 
-                    connected={connected}
-                    accountId={accountId}
-                    onConnect={connect}
-                    onDisconnect={disconnect}
-                    isConnecting={isConnecting}
-                />
+                <div className="card-3d-tilt">
+                    <WalletConnect 
+                        connected={connected}
+                        accountId={accountId}
+                        onConnect={connect}
+                        onDisconnect={disconnect}
+                        isConnecting={isConnecting}
+                    />
+                </div>
             </header>
 
             {/* Main Area */}
             <main className="max-w-7xl mx-auto relative z-20">
-                <div className="relative group brutalist-card p-0 overflow-hidden border-none shadow-none">
+                <div className="relative group brutalist-card p-0 overflow-hidden border-none shadow-none card-3d-tilt floating-3d">
                     {/* Hardware Frame Brackets */}
                     <div className="hardware-corner hardware-corner-tl"></div>
                     <div className="hardware-corner hardware-corner-tr"></div>
@@ -217,21 +221,24 @@ function App() {
                         Relay_Slab_Unit: 0x88
                     </div>
 
+                    {/* THE GAME (Flat 2D Monitor) */}
                     <GameCanvas 
                         gameState={gameState} 
                         onFlip={handleCanvasClick} 
                     />
                 </div>
 
-                <TerminalUI 
-                    score={gameScore}
-                    onStart={handleStartGame}
-                    onClaimStars={handleClaim}
-                    connected={connected}
-                    isPaying={isPaying}
-                    leaderboard={leaderboard}
-                    starCount={starCount}
-                />
+                <div className="card-3d-tilt">
+                    <TerminalUI 
+                        score={gameScore}
+                        onStart={handleStartGame}
+                        onClaimStars={handleClaim}
+                        connected={connected}
+                        isPaying={isPaying}
+                        leaderboard={leaderboard}
+                        starCount={starCount}
+                    />
+                </div>
             </main>
 
             <footer className="max-w-7xl mx-auto mt-20 flex justify-between items-end opacity-20 text-[9px] uppercase font-mono tracking-widest border-t-2 border-electric-lavender/30 pt-4 text-electric-lavender">
