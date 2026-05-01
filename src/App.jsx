@@ -3,7 +3,7 @@ import { useHedera } from './hooks/useHedera';
 import { useGameLoop } from './hooks/useGameLoop';
 import GameCanvas from './components/GameCanvas';
 import TerminalUI from './components/TerminalUI';
-import WalletConnect from './components/WalletConnect';
+import WalletConnectNode from './components/WalletConnectNode';
 import { Zap, Activity, Cpu, Shield, Trophy } from 'lucide-react';
 import LeaderboardModal from './components/LeaderboardModal';
 
@@ -205,7 +205,7 @@ function App() {
                     </button>
 
                     <div className="card-3d-tilt">
-                        <WalletConnect 
+                        <WalletConnectNode 
                             connected={connected}
                             accountId={accountId}
                             onConnect={connect}
