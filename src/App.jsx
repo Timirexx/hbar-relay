@@ -10,14 +10,14 @@ import { Box, Zap } from 'lucide-react';
 // Reown AppKit / Wagmi Imports
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { hederaTestnet } from '@wagmi/core/chains';
+import { hederaTestnet } from 'wagmi/chains';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // 1. Setup QueryClient
 const queryClient = new QueryClient();
 
-// 2. Setup Project ID
+// 2. Setup Project ID (Use fallback for dev)
 const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || 'f915729e246835150827299a941584c0';
 
 // 3. Setup Wagmi Adapter
@@ -27,24 +27,29 @@ const wagmiAdapter = new WagmiAdapter({
     networks
 });
 
-// 4. Create AppKit
-createAppKit({
-    adapters: [wagmiAdapter],
-    networks,
-    projectId,
-    features: {
-        analytics: true
-    },
-    themeMode: 'dark',
-    themeVariables: {
-        '--w3m-accent': '#A855F7',
-        '--w3m-border-radius-master': '24px'
-    }
-});
+// 4. Create AppKit (Wrapped in a try-catch to prevent app-wide crash)
+try {
+    createAppKit({
+        adapters: [wagmiAdapter],
+        networks,
+        projectId,
+        metadata: {
+            name: 'HBAR RELAY',
+            description: 'Brutalist 2D dApp Relay',
+            url: 'https://hbar-relay.vercel.app',
+            icons: ['https://www.hashpack.app/img/logo.svg']
+        },
+        features: {
+            analytics: false
+        },
+        themeMode: 'dark'
+    });
+} catch (e) {
+    console.error("AppKit Initialization Failed:", e);
+}
 
 function AppContent() {
     const { 
-        initiateEntryFee, 
         reportScore, 
         claimDailyStars,
         fetchLeaderboard 
@@ -52,7 +57,6 @@ function AppContent() {
 
     const [gameScore, setGameScore] = useState(0);
     const [leaderboard, setLeaderboard] = useState([]);
-    const [isPaying, setIsPaying] = useState(false);
     const [starCount, setStarCount] = useState(0);
     const [isBooting, setIsBooting] = useState(true);
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
@@ -130,31 +134,33 @@ function AppContent() {
 
     if (isBooting) {
         return (
-            <div className="fixed inset-0 bg-base-black flex items-center justify-center z-[500]">
-                <div className="text-light-purple font-black tracking-[0.5em] animate-pulse">HBAR_RELAY_v2.1_REBOOTING...</div>
+            <div className="fixed inset-0 bg-[#000000] flex items-center justify-center z-[500]">
+                <div className="text-[#C084FC] font-black tracking-[0.5em] animate-pulse uppercase">
+                    Initializing_Uplink_v2.5
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-base-black text-white p-4 md:p-8 font-modern relative overflow-hidden">
-            <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-dark-purple/20 blur-[150px] rounded-full -z-10"></div>
+        <div className="min-h-screen bg-[#000000] text-white p-4 md:p-8 font-sans relative overflow-hidden">
+            <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[#2D1B4E]/20 blur-[150px] rounded-full -z-10"></div>
             
             <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-12 gap-8 relative z-20">
                 <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-2xl bg-light-purple flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)]">
+                    <div className="w-16 h-16 rounded-2xl bg-[#C084FC] flex items-center justify-center shadow-[0_0_30px_rgba(192,132,252,0.5)]">
                         <Box size={32} className="text-white" />
                     </div>
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-none text-white">HBAR_RELAY</h1>
-                        <p className="text-[10px] text-light-purple font-bold tracking-widest uppercase opacity-60">DUAL_WALLET_PROTOCOL_v2</p>
+                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">DUAL_WALLET_READY</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <button 
                         onClick={() => setIsLeaderboardOpen(true)}
-                        className="bg-dark-purple/40 border border-light-purple/20 px-6 py-3 rounded-2xl text-xs font-bold hover:border-light-purple/60 transition-all"
+                        className="bg-[#2D1B4E]/40 border border-[#C084FC]/20 px-6 py-3 rounded-2xl text-xs font-bold hover:border-[#C084FC]/60 transition-all"
                     >
                         🏆 LEADERBOARD
                     </button>
