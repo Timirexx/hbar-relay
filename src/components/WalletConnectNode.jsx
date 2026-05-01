@@ -17,7 +17,10 @@ const WalletConnectNode = () => {
     if (!isConnected) {
         return (
             <button 
-                onClick={openWalletModal}
+                onClick={() => {
+                    console.log("HBAR_RELAY // BUTTON_CLICKED // ATTEMPTING_OPEN");
+                    openWalletModal();
+                }}
                 className="group bg-[#2A1B3D] text-white px-8 py-4 rounded-2xl flex items-center gap-3 font-black tracking-widest text-sm uppercase transition-all duration-300 shadow-tactile border-t border-white/10 hover:scale-105 hover:bg-[#3D2759] active:translate-y-1 active:shadow-inner animate-pulse-glow"
             >
                 <Wallet size={18} className="group-hover:rotate-12 transition-transform" />
