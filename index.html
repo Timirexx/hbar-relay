@@ -8,6 +8,11 @@
   </head>
   <body class="bg-black">
     <div id="root"></div>
+    <script>
+      window.global = window;
+      window.process = { env: {} };
+      console.log("HBAR_RELAY // BOOT_LOADER_ACTIVE");
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

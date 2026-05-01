@@ -11,7 +11,7 @@
   "devDependencies": {
     "@vitejs/plugin-react-swc": "^4.3.0",
     "typescript": "~6.0.2",
-    "vite": "^8.0.10"
+    "vite": "^6.0.0"
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.81.0",
