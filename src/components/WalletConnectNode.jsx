@@ -74,9 +74,9 @@ const WalletConnectNode = ({ onOpenChoice }) => {
 
                     <button 
                         onClick={() => {
-                            disconnect();
+                            disconnectWallet();
                             setDropdownOpen(false);
-                            setIsChoiceModalOpen(true);
+                            onOpenChoice();
                         }}
                         className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-light-purple/10 text-xs font-bold text-white transition-all"
                     >
@@ -88,7 +88,7 @@ const WalletConnectNode = ({ onOpenChoice }) => {
 
                     <button 
                         onClick={() => {
-                            disconnect();
+                            disconnectWallet();
                             setDropdownOpen(false);
                         }}
                         className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-500/10 text-xs font-bold text-red-400 transition-all"

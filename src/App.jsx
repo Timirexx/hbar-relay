@@ -7,46 +7,9 @@ import WalletConnectNode from './components/WalletConnectNode';
 import LeaderboardModal from './components/LeaderboardModal';
 import WalletChoiceModal from './components/WalletChoiceModal';
 import { Box } from 'lucide-react';
-
-// Reown AppKit / Wagmi Imports
-import { createAppKit, useAppKit } from '@reown/appkit/react';
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { hederaTestnet } from 'wagmi/chains';
-import { WagmiProvider } from 'wagmi';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAppKit } from '@reown/appkit/react';
 import { useDualWallet } from './hooks/useDualWallet';
-
-// 1. Setup QueryClient
-const queryClient = new QueryClient();
-
-// 2. Setup Project ID
-const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || 'f915729e246835150827299a941584c0';
-
-// 3. Setup Wagmi Adapter
-const networks = [hederaTestnet];
-const wagmiAdapter = new WagmiAdapter({
-    projectId,
-    networks
-});
-
-// 4. Create AppKit
-try {
-    createAppKit({
-        adapters: [wagmiAdapter],
-        networks,
-        projectId,
-        metadata: {
-            name: 'HBAR RELAY',
-            description: 'Brutalist 2D dApp Relay',
-            url: 'https://hbar-relay.vercel.app',
-            icons: ['https://www.hashpack.app/img/logo.svg']
-        },
-        features: { analytics: false },
-        themeMode: 'dark'
-    });
-} catch (e) {
-    console.error("AppKit Initialization Failed:", e);
-}
+import { Web3Provider } from './providers/Web3Provider';
 
 function AppContent() {
     const { reportScore, claimDailyStars, fetchLeaderboard } = useHedera();
@@ -131,7 +94,7 @@ function AppContent() {
         return (
             <div className="fixed inset-0 bg-[#000000] flex items-center justify-center z-[10000]">
                 <div className="text-[#C084FC] font-black tracking-[0.5em] animate-pulse uppercase">
-                    Initializing_Uplink_v2.5
+                    Initializing_Uplink_v3.0
                 </div>
             </div>
         );
@@ -148,7 +111,7 @@ function AppContent() {
                     </div>
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-none text-white">HBAR_RELAY</h1>
-                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">SIGNAL_RUNNER_PROTOCOL</p>
+                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">MODULAR_WEB3_ENGINE_v3</p>
                     </div>
                 </div>
 
@@ -192,10 +155,8 @@ function AppContent() {
 
 export default function App() {
     return (
-        <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-            <QueryClientProvider client={queryClient}>
-                <AppContent />
-            </QueryClientProvider>
-        </WagmiProvider>
+        <Web3Provider>
+            <AppContent />
+        </Web3Provider>
     );
 }

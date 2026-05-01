@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useAccount, useBalance, useDisconnect } from 'wagmi';
+import { useAppKit } from '@reown/appkit/react';
 import { useHedera } from './useHedera';
 
 export const useDualWallet = () => {
@@ -7,6 +8,7 @@ export const useDualWallet = () => {
     const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
     const { data: evmBalance } = useBalance({ address: evmAddress });
     const { disconnect: disconnectEvm } = useDisconnect();
+    const { open: openAppKit } = useAppKit();
 
     // Native Side (HashConnect)
     const { 
@@ -21,37 +23,43 @@ export const useDualWallet = () => {
     const isConnected = isEvmConnected || isNativeConnected;
     const walletType = isEvmConnected ? 'evm' : (isNativeConnected ? 'native' : null);
 
-    // Normalized Address
+    // Normalized Address (Truncated)
     const address = useMemo(() => {
-        if (isEvmConnected) return evmAddress;
-        if (isNativeConnected) return nativeAddress;
+        if (isEvmConnected && evmAddress) return evmAddress;
+        if (isNativeConnected && nativeAddress) return nativeAddress;
         return null;
     }, [evmAddress, nativeAddress, isEvmConnected, isNativeConnected]);
 
-    // Normalized Balance (in HBAR)
+    // Normalized Balance (in HBAR, rounded to 2 decimal places)
     const balance = useMemo(() => {
         if (isEvmConnected && evmBalance) {
-            return `${parseFloat(evmBalance.formatted).toFixed(2)} HBAR`;
+            const formatted = parseFloat(evmBalance.formatted);
+            return `${formatted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} HBAR`;
         }
-        // For native, we would ideally fetch the balance here if not already in useHedera
-        // For now, returning a placeholder or fetching logic could be added
-        return isNativeConnected ? "FETCHING..." : "0 HBAR";
+        if (isNativeConnected) return "FETCHING...";
+        return "0.00 HBAR";
     }, [evmBalance, isEvmConnected, isNativeConnected]);
 
-    const disconnect = () => {
+    // Helper functions requested by user
+    const openWalletModal = () => openAppKit();
+    
+    const disconnectWallet = () => {
         if (isEvmConnected) disconnectEvm();
         if (isNativeConnected) disconnectNative();
     };
 
     return {
+        // User requested fields
+        openWalletModal,
+        disconnectWallet,
         isConnected,
-        walletType,
         address,
         balance,
-        disconnect,
+        
+        // Extended fields for dual support
+        walletType,
         connectNative,
         isNativeConnecting,
-        // Expose original hooks if needed for specific actions
         evm: { address: evmAddress, isConnected: isEvmConnected },
         native: { accountId: nativeAddress, isConnected: isNativeConnected }
     };
