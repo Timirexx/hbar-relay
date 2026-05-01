@@ -4,41 +4,28 @@ import { useDualWallet } from '../hooks/useDualWallet';
 import { useAppKit } from '@reown/appkit/react';
 import WalletChoiceModal from './WalletChoiceModal';
 
-const WalletConnectNode = () => {
+const WalletConnectNode = ({ onOpenChoice }) => {
     const { 
         isConnected, 
         walletType, 
         address, 
         balance, 
-        disconnect, 
-        connectNative, 
-        isNativeConnecting 
+        disconnect 
     } = useDualWallet();
 
-    const { open: openAppKit } = useAppKit();
-    const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const truncateId = (id) => id ? `${id.slice(0, 6)}...${id.slice(-4)}` : '';
 
     if (!isConnected) {
         return (
-            <>
-                <button 
-                    onClick={() => setIsChoiceModalOpen(true)}
-                    className="group bg-[#2A1B3D] text-white px-8 py-4 rounded-2xl flex items-center gap-3 font-black tracking-widest text-sm uppercase transition-all duration-300 shadow-tactile border-t border-white/10 hover:scale-105 hover:bg-[#3D2759] active:translate-y-1 active:shadow-inner animate-pulse-glow"
-                >
-                    <Wallet size={18} className="group-hover:rotate-12 transition-transform" />
-                    <span>{isNativeConnecting ? 'LINKING...' : 'Connect Wallet'}</span>
-                </button>
-
-                <WalletChoiceModal 
-                    isOpen={isChoiceModalOpen}
-                    onClose={() => setIsChoiceModalOpen(false)}
-                    onSelectEVM={() => openAppKit()}
-                    onSelectNative={connectNative}
-                />
-            </>
+            <button 
+                onClick={onOpenChoice}
+                className="group bg-[#2A1B3D] text-white px-8 py-4 rounded-2xl flex items-center gap-3 font-black tracking-widest text-sm uppercase transition-all duration-300 shadow-tactile border-t border-white/10 hover:scale-105 hover:bg-[#3D2759] active:translate-y-1 active:shadow-inner animate-pulse-glow"
+            >
+                <Wallet size={18} className="group-hover:rotate-12 transition-transform" />
+                <span>Connect Wallet</span>
+            </button>
         );
     }
 

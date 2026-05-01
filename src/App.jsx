@@ -5,19 +5,21 @@ import GameCanvas from './components/GameCanvas';
 import TerminalUI from './components/TerminalUI';
 import WalletConnectNode from './components/WalletConnectNode';
 import LeaderboardModal from './components/LeaderboardModal';
-import { Box, Zap } from 'lucide-react';
+import WalletChoiceModal from './components/WalletChoiceModal';
+import { Box } from 'lucide-react';
 
 // Reown AppKit / Wagmi Imports
-import { createAppKit } from '@reown/appkit/react';
+import { createAppKit, useAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { hederaTestnet } from 'wagmi/chains';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useDualWallet } from './hooks/useDualWallet';
 
 // 1. Setup QueryClient
 const queryClient = new QueryClient();
 
-// 2. Setup Project ID (Use fallback for dev)
+// 2. Setup Project ID
 const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || 'f915729e246835150827299a941584c0';
 
 // 3. Setup Wagmi Adapter
@@ -27,7 +29,7 @@ const wagmiAdapter = new WagmiAdapter({
     networks
 });
 
-// 4. Create AppKit (Wrapped in a try-catch to prevent app-wide crash)
+// 4. Create AppKit
 try {
     createAppKit({
         adapters: [wagmiAdapter],
@@ -39,9 +41,7 @@ try {
             url: 'https://hbar-relay.vercel.app',
             icons: ['https://www.hashpack.app/img/logo.svg']
         },
-        features: {
-            analytics: false
-        },
+        features: { analytics: false },
         themeMode: 'dark'
     });
 } catch (e) {
@@ -49,17 +49,16 @@ try {
 }
 
 function AppContent() {
-    const { 
-        reportScore, 
-        claimDailyStars,
-        fetchLeaderboard 
-    } = useHedera();
+    const { reportScore, claimDailyStars, fetchLeaderboard } = useHedera();
+    const { connectNative } = useDualWallet();
+    const { open: openAppKit } = useAppKit();
 
     const [gameScore, setGameScore] = useState(0);
     const [leaderboard, setLeaderboard] = useState([]);
     const [starCount, setStarCount] = useState(0);
     const [isBooting, setIsBooting] = useState(true);
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+    const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => setIsBooting(false), 2000);
@@ -84,15 +83,11 @@ function AppContent() {
 
     const handleGameOver = useCallback((finalScore) => {
         if (finalScore > 0) {
-            reportScore(finalScore).then(() => {
-                refreshLeaderboard();
-            });
+            reportScore(finalScore).then(() => refreshLeaderboard());
         }
     }, [reportScore, refreshLeaderboard]);
 
-    const handleScoreUpdate = useCallback((score) => {
-        setGameScore(score);
-    }, []);
+    const handleScoreUpdate = useCallback((score) => setGameScore(score), []);
 
     const { update, flipGravity, resetGame, gameState } = useGameLoop(handleGameOver, handleScoreUpdate);
 
@@ -134,7 +129,7 @@ function AppContent() {
 
     if (isBooting) {
         return (
-            <div className="fixed inset-0 bg-[#000000] flex items-center justify-center z-[500]">
+            <div className="fixed inset-0 bg-[#000000] flex items-center justify-center z-[10000]">
                 <div className="text-[#C084FC] font-black tracking-[0.5em] animate-pulse uppercase">
                     Initializing_Uplink_v2.5
                 </div>
@@ -146,14 +141,14 @@ function AppContent() {
         <div className="min-h-screen bg-[#000000] text-white p-4 md:p-8 font-sans relative overflow-hidden">
             <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[#2D1B4E]/20 blur-[150px] rounded-full -z-10"></div>
             
-            <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-12 gap-8 relative z-20">
+            <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-12 gap-8 relative z-50">
                 <div className="flex items-center gap-6">
                     <div className="w-16 h-16 rounded-2xl bg-[#C084FC] flex items-center justify-center shadow-[0_0_30px_rgba(192,132,252,0.5)]">
                         <Box size={32} className="text-white" />
                     </div>
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-none text-white">HBAR_RELAY</h1>
-                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">DUAL_WALLET_READY</p>
+                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">SIGNAL_RUNNER_PROTOCOL</p>
                     </div>
                 </div>
 
@@ -164,11 +159,11 @@ function AppContent() {
                     >
                         🏆 LEADERBOARD
                     </button>
-                    <WalletConnectNode />
+                    <WalletConnectNode onOpenChoice={() => setIsChoiceModalOpen(true)} />
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto relative z-20">
+            <main className="max-w-7xl mx-auto relative z-10">
                 <GameCanvas gameState={gameState} onFlip={handleCanvasClick} />
                 <TerminalUI 
                     score={gameScore}
@@ -184,11 +179,17 @@ function AppContent() {
                 onClose={() => setIsLeaderboardOpen(false)} 
                 leaderboard={leaderboard}
             />
+
+            <WalletChoiceModal 
+                isOpen={isChoiceModalOpen}
+                onClose={() => setIsChoiceModalOpen(false)}
+                onSelectEVM={() => openAppKit()}
+                onSelectNative={connectNative}
+            />
         </div>
     );
 }
 
-// Wrapper for Wagmi and Query Providers
 export default function App() {
     return (
         <WagmiProvider config={wagmiAdapter.wagmiConfig}>
