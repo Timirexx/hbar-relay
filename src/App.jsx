@@ -4,51 +4,61 @@ import { useGameLoop } from './hooks/useGameLoop';
 import GameCanvas from './components/GameCanvas';
 import TerminalUI from './components/TerminalUI';
 import WalletConnectNode from './components/WalletConnectNode';
-import { Zap, Activity, Cpu, Shield, Trophy } from 'lucide-react';
 import LeaderboardModal from './components/LeaderboardModal';
 
-function App() {
+// Reown AppKit / Wagmi Imports
+import { createAppKit } from '@reown/appkit/react';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { hederaTestnet } from '@wagmi/core/chains';
+import { WagmiProvider } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// 1. Setup QueryClient
+const queryClient = new QueryClient();
+
+// 2. Setup Project ID
+const projectId = import.meta.env.VITE_REOWN_PROJECT_ID;
+
+// 3. Setup Wagmi Adapter
+const networks = [hederaTestnet];
+const wagmiAdapter = new WagmiAdapter({
+    projectId,
+    networks
+});
+
+// 4. Create AppKit
+createAppKit({
+    adapters: [wagmiAdapter],
+    networks,
+    projectId,
+    features: {
+        analytics: true
+    },
+    themeMode: 'dark',
+    themeVariables: {
+        '--w3m-accent': '#A855F7',
+        '--w3m-border-radius-master': '24px'
+    }
+});
+
+function AppContent() {
     const { 
-        connected, 
-        accountId, 
-        connect, 
-        disconnect, 
         initiateEntryFee, 
         reportScore, 
         claimDailyStars,
-        fetchLeaderboard,
-        isConnecting 
+        fetchLeaderboard 
     } = useHedera();
 
     const [gameScore, setGameScore] = useState(0);
     const [leaderboard, setLeaderboard] = useState([]);
     const [isPaying, setIsPaying] = useState(false);
-    const [isGameOver, setIsGameOver] = useState(false);
     const [starCount, setStarCount] = useState(0);
     const [isBooting, setIsBooting] = useState(true);
-    const [bootLogs, setBootLogs] = useState([]);
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
 
-    // Boot Sequence Simulation
     useEffect(() => {
-        const logs = [
-            "> INITIALIZING_VIOLET_CORE...",
-            "> SYNCING_HEDERA_NETWORK_TESTNET...",
-            "> LOADING_MIRROR_NODE_INTERFACE...",
-            "> CHECKING_WALLET_PAIRING_STATUS...",
-            "> READY_FOR_UPLINK."
-        ];
-        let i = 0;
-        const interval = setInterval(() => {
-            if (i < logs.length) {
-                setBootLogs(prev => [...prev, logs[i]]);
-                i++;
-            } else {
-                clearInterval(interval);
-                setTimeout(() => setIsBooting(false), 800);
-            }
-        }, 400);
-        return () => clearInterval(interval);
+        const timer = setTimeout(() => setIsBooting(false), 2000);
+        return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -68,7 +78,6 @@ function App() {
     }, [refreshLeaderboard]);
 
     const handleGameOver = useCallback((finalScore) => {
-        setIsGameOver(true);
         if (finalScore > 0) {
             reportScore(finalScore).then(() => {
                 refreshLeaderboard();
@@ -83,18 +92,8 @@ function App() {
     const { update, flipGravity, resetGame, gameState } = useGameLoop(handleGameOver, handleScoreUpdate);
 
     const handleStartGame = async () => {
-        if (!connected) return;
-        setIsPaying(true);
-        try {
-            await initiateEntryFee();
-            setIsGameOver(false);
-            setGameScore(0);
-            resetGame();
-        } catch (error) {
-            console.error("Payment failed", error);
-        } finally {
-            setIsPaying(false);
-        }
+        setGameScore(0);
+        resetGame();
     };
 
     const handleClaim = async () => {
@@ -104,10 +103,17 @@ function App() {
                 const newCount = starCount + 50;
                 setStarCount(newCount);
                 localStorage.setItem('star_count', newCount.toString());
-                localStorage.setItem('last_star_claim', Date.now().toString());
             }
         } catch (error) {
             console.error(error.message);
+        }
+    };
+
+    const handleCanvasClick = () => {
+        if (!gameState.current.isActive) {
+            handleStartGame();
+        } else {
+            flipGravity();
         }
     };
 
@@ -121,157 +127,69 @@ function App() {
         return () => cancelAnimationFrame(frameId);
     }, [update]);
 
-    useEffect(() => {
-        const handleKey = (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                flipGravity();
-            }
-        };
-        window.addEventListener('keydown', handleKey);
-        return () => window.removeEventListener('keydown', handleKey);
-    }, [flipGravity]);
-
     if (isBooting) {
         return (
-            <div className="boot-screen crt-overlay">
-                <div className="max-w-md mx-auto mt-20 space-y-2">
-                    <div className="flex items-center gap-2 mb-8">
-                        <div className="w-8 h-8 border-2 border-electric-lavender flex items-center justify-center animate-spin">
-                            <Cpu size={16} />
-                        </div>
-                        <span className="font-black italic text-xl">HBAR_RELAY_BOOT_v1.2.4</span>
-                    </div>
-                    {bootLogs.map((log, idx) => (
-                        <div key={idx} className="opacity-80">
-                            {log}
-                        </div>
-                    ))}
-                    <div className="w-full h-1 bg-white/10 mt-4 overflow-hidden">
-                        <div className="h-full bg-electric-lavender animate-[data-scroll_2s_linear_infinite]" style={{width: '60%'}}></div>
-                    </div>
-                </div>
+            <div className="fixed inset-0 bg-base-black flex items-center justify-center z-[500]">
+                <div className="text-light-purple font-black tracking-[0.5em] animate-pulse">HBAR_RELAY_v2.1_DUAL_CORE</div>
             </div>
         );
     }
 
-    const handleCanvasClick = () => {
-        if (!gameState.current.isActive) {
-            if (connected) {
-                handleStartGame();
-            } else {
-                connect();
-            }
-        } else {
-            flipGravity();
-        }
-    };
-
     return (
-        <div className="min-h-screen bg-cyber-indigo text-soft-lilac p-4 md:p-8 font-mono relative crt-overlay overflow-hidden perspective-container">
-            {/* 3D Environment Layers */}
-            <div className="bg-3d-grid"></div>
-            <div className="fixed inset-0 bg-data-stream opacity-40 pointer-events-none z-0"></div>
-            <div className="fixed inset-0 bg-grain pointer-events-none z-[100]"></div>
+        <div className="min-h-screen bg-base-black text-white p-4 md:p-8 font-modern relative overflow-hidden">
+            <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-dark-purple/20 blur-[150px] rounded-full -z-10"></div>
             
-            {/* Header */}
-            <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 relative z-20">
-                <div className="flex items-center gap-6 group">
-                    <div className="bg-electric-lavender p-4 border-4 border-white shadow-[6px_6px_0px_#A855F7] -rotate-1 relative transition-transform group-hover:rotate-0 floating-3d">
-                        <Zap size={40} className="text-cyber-indigo" fill="currentColor" />
-                        <div className="hardware-corner hardware-corner-tl !-top-2 !-left-2"></div>
-                        <div className="hardware-corner hardware-corner-br !-bottom-2 !-right-2"></div>
+            <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-12 gap-8 relative z-20">
+                <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 rounded-2xl bg-light-purple flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.5)]">
+                        <Box size={32} className="text-white" />
                     </div>
-                    <div className="card-3d-tilt">
-                        <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none text-white drop-shadow-[0_0_15px_#A855F7] text-glitch">
-                            HBAR_RELAY
-                        </h1>
-                        <div className="flex items-center gap-2 mt-2">
-                            <div className="led-blink"></div>
-                            <p className="text-[10px] text-electric-lavender opacity-60 font-mono tracking-[0.3em] uppercase">
-                                Signal_Runner_Protocol // SECURE_NODE: {accountId || "DISCONNECTED"}
-                            </p>
-                        </div>
+                    <div>
+                        <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-none text-white">HBAR_RELAY</h1>
+                        <p className="text-[10px] text-light-purple font-bold tracking-widest uppercase opacity-60">DUAL_WALLET_PROTOCOL_v2</p>
                     </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-6">
-                    {/* LEADERBOARD TRIGGER */}
+                <div className="flex items-center gap-4">
                     <button 
                         onClick={() => setIsLeaderboardOpen(true)}
-                        className="bg-[#2A1B3D] text-white px-6 py-3 rounded-xl shadow-tactile border-t border-white/10 flex items-center gap-2 font-black italic text-xs uppercase tracking-widest hover:scale-105 hover:bg-[#3D2759] hover:shadow-[0_0_20px_rgba(192,132,252,0.4)] transition-all card-3d-tilt"
+                        className="bg-dark-purple/40 border border-light-purple/20 px-6 py-3 rounded-2xl text-xs font-bold hover:border-light-purple/60 transition-all"
                     >
-                        <Trophy size={16} /> Leaderboard
+                        🏆 LEADERBOARD
                     </button>
-
-                    <div className="card-3d-tilt">
-                        <WalletConnectNode 
-                            connected={connected}
-                            accountId={accountId}
-                            onConnect={connect}
-                            onDisconnect={disconnect}
-                            isConnecting={isConnecting}
-                        />
-                    </div>
+                    <WalletConnectNode />
                 </div>
             </header>
 
-            {/* Main Area */}
             <main className="max-w-7xl mx-auto relative z-20">
-                <div className="relative group brutalist-card p-0 overflow-hidden border-none shadow-none card-3d-tilt floating-3d">
-                    {/* Hardware Frame Brackets */}
-                    <div className="hardware-corner hardware-corner-tl"></div>
-                    <div className="hardware-corner hardware-corner-tr"></div>
-                    <div className="hardware-corner hardware-corner-bl"></div>
-                    <div className="hardware-corner hardware-corner-br"></div>
-                    
-                    {/* Industrial Labels */}
-                    <div className="absolute top-2 left-10 text-[8px] text-electric-lavender opacity-50 uppercase flex items-center gap-2">
-                        <Shield size={10} /> Data_Shield_Active
-                    </div>
-                    <div className="absolute bottom-2 right-10 text-[8px] text-electric-lavender opacity-50 uppercase">
-                        Relay_Slab_Unit: 0x88
-                    </div>
-
-                    {/* THE GAME (Flat 2D Monitor) */}
-                    <GameCanvas 
-                        gameState={gameState} 
-                        onFlip={handleCanvasClick} 
-                    />
-                </div>
-
-                <div className="card-3d-tilt">
-                    <TerminalUI 
-                        score={gameScore}
-                        onStart={handleStartGame}
-                        onClaimStars={handleClaim}
-                        connected={connected}
-                        isPaying={isPaying}
-                        leaderboard={leaderboard}
-                        starCount={starCount}
-                    />
-                </div>
+                <GameCanvas gameState={gameState} onFlip={handleCanvasClick} />
+                <TerminalUI 
+                    score={gameScore}
+                    onStart={handleStartGame}
+                    onClaimStars={handleClaim}
+                    starCount={starCount}
+                    leaderboard={leaderboard}
+                />
             </main>
-
-            <footer className="max-w-7xl mx-auto mt-20 flex justify-between items-end opacity-20 text-[9px] uppercase font-mono tracking-widest border-t-2 border-electric-lavender/30 pt-4 text-electric-lavender">
-                <div className="flex items-center gap-4">
-                    <span>[ SCAN_00 ]</span>
-                    <span>[ SYNC_ENCRYPTED ]</span>
-                </div>
-                <div className="text-right">
-                    VIOLET_RELAY_INTERFACE_SYSTEM<br />
-                    DATA_EXTRACT_PROTOCOL_v1.2.4_READY
-                </div>
-            </footer>
 
             <LeaderboardModal 
                 isOpen={isLeaderboardOpen} 
                 onClose={() => setIsLeaderboardOpen(false)} 
-                accountId={accountId}
                 leaderboard={leaderboard}
             />
         </div>
     );
 }
 
-export default App;
+// Wrapper for Wagmi and Query Providers
+export default function App() {
+    return (
+        <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+            <QueryClientProvider client={queryClient}>
+                <AppContent />
+            </QueryClientProvider>
+        </WagmiProvider>
+    );
+}
+
+import { Box } from 'lucide-react';

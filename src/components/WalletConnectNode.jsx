@@ -1,35 +1,49 @@
 import React, { useState } from 'react';
-import { Wallet, ChevronDown, Copy, RefreshCw, LogOut, ShieldCheck } from 'lucide-react';
+import { Wallet, ChevronDown, Copy, RefreshCw, LogOut, Box, Zap } from 'lucide-react';
+import { useDualWallet } from '../hooks/useDualWallet';
+import { useAppKit } from '@reown/appkit/react';
+import WalletChoiceModal from './WalletChoiceModal';
 
-const WalletConnectNode = ({ connected, accountId, onConnect, onDisconnect, isConnecting }) => {
+const WalletConnectNode = () => {
+    const { 
+        isConnected, 
+        walletType, 
+        address, 
+        balance, 
+        disconnect, 
+        connectNative, 
+        isNativeConnecting 
+    } = useDualWallet();
+
+    const { open: openAppKit } = useAppKit();
+    const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [copied, setCopied] = useState(false);
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(accountId);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    const truncateId = (id) => id ? `${id.slice(0, 6)}...${id.slice(-4)}` : '';
 
-    const truncateId = (id) => id ? `${id.slice(0, 5)}...${id.slice(-3)}` : '';
-
-    if (!connected) {
+    if (!isConnected) {
         return (
-            <div className="fixed top-8 right-8 z-[100]">
+            <>
                 <button 
-                    onClick={onConnect}
-                    disabled={isConnecting}
+                    onClick={() => setIsChoiceModalOpen(true)}
                     className="group bg-[#2A1B3D] text-white px-8 py-4 rounded-2xl flex items-center gap-3 font-black tracking-widest text-sm uppercase transition-all duration-300 shadow-tactile border-t border-white/10 hover:scale-105 hover:bg-[#3D2759] active:translate-y-1 active:shadow-inner animate-pulse-glow"
                 >
                     <Wallet size={18} className="group-hover:rotate-12 transition-transform" />
-                    <span>{isConnecting ? 'LINKING...' : 'Connect Wallet'}</span>
+                    <span>{isNativeConnecting ? 'LINKING...' : 'Connect Wallet'}</span>
                 </button>
-            </div>
+
+                <WalletChoiceModal 
+                    isOpen={isChoiceModalOpen}
+                    onClose={() => setIsChoiceModalOpen(false)}
+                    onSelectEVM={() => openAppKit()}
+                    onSelectNative={connectNative}
+                />
+            </>
         );
     }
 
     return (
-        <div className="fixed top-8 right-8 z-[100] flex flex-col items-end gap-2">
+        <div className="relative flex flex-col items-end gap-2">
             {/* TELEMETRY PILL */}
             <div 
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -37,38 +51,46 @@ const WalletConnectNode = ({ connected, accountId, onConnect, onDisconnect, isCo
             >
                 {/* Left: Network */}
                 <div className="flex items-center gap-2 pl-3">
-                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22D3EE]"></div>
-                    <span className="text-[10px] font-black tracking-[0.2em] text-cyan-400/80">HEDERA</span>
+                    <div className={`w-2 h-2 rounded-full animate-pulse shadow-lg ${walletType === 'evm' ? 'bg-[#627EEA] shadow-[#627EEA]' : 'bg-light-purple shadow-light-purple'}`}></div>
+                    <span className="text-[10px] font-black tracking-[0.2em] text-white/60">
+                        {walletType === 'evm' ? 'EVM_NET' : 'HEDERA_NATIVE'}
+                    </span>
                 </div>
 
                 {/* Center: Balance */}
                 <div className="text-sm font-black text-white flex items-center gap-2 drop-shadow-[0_0_8px_#A855F7]">
-                    <span className="opacity-40 text-[10px]">BAL:</span>
-                    <span>1,200 HBAR</span>
+                    <span className="opacity-40 text-[10px]">READOUT:</span>
+                    <span>{balance}</span>
                 </div>
 
-                {/* Right: Truncated ID (Carved Inset) */}
+                {/* Right: Address (Carved Inset) */}
                 <div className="bg-black/40 px-4 py-2 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] border border-white/5 flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-light-purple">{truncateId(accountId)}</span>
+                    {walletType === 'evm' ? <Box size={14} className="text-[#627EEA]" /> : <Zap size={14} className="text-light-purple" fill="currentColor" />}
+                    <span className="text-xs font-mono font-bold text-light-purple/90">{truncateId(address)}</span>
                     <ChevronDown size={14} className={`text-light-purple transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </div>
             </div>
 
             {/* DROPDOWN MENU */}
             {dropdownOpen && (
-                <div className="w-56 bg-[#1A1025]/95 backdrop-blur-xl border border-light-purple/20 rounded-2xl shadow-3xl p-2 animate-slide-down overflow-hidden">
+                <div className="absolute top-full mt-2 w-56 bg-[#1A1025]/95 backdrop-blur-xl border border-light-purple/20 rounded-2xl shadow-3xl p-2 animate-slide-down overflow-hidden z-[100]">
                     <button 
-                        onClick={handleCopy}
-                        className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-light-purple/10 text-xs font-bold text-white transition-all group"
+                        onClick={() => {
+                            navigator.clipboard.writeText(address);
+                            setDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-light-purple/10 text-xs font-bold text-white transition-all group"
                     >
-                        <div className="flex items-center gap-3">
-                            <Copy size={14} className="text-light-purple" />
-                            <span>Copy Address</span>
-                        </div>
-                        {copied && <span className="text-[10px] text-green-400">COPIED</span>}
+                        <Copy size={14} className="text-light-purple" />
+                        <span>Copy Address</span>
                     </button>
 
                     <button 
+                        onClick={() => {
+                            disconnect();
+                            setDropdownOpen(false);
+                            setIsChoiceModalOpen(true);
+                        }}
                         className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-light-purple/10 text-xs font-bold text-white transition-all"
                     >
                         <RefreshCw size={14} className="text-light-purple" />
@@ -79,7 +101,7 @@ const WalletConnectNode = ({ connected, accountId, onConnect, onDisconnect, isCo
 
                     <button 
                         onClick={() => {
-                            onDisconnect();
+                            disconnect();
                             setDropdownOpen(false);
                         }}
                         className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-500/10 text-xs font-bold text-red-400 transition-all"

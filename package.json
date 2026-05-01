@@ -15,7 +15,10 @@
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.81.0",
+    "@reown/appkit": "^1.8.19",
+    "@reown/appkit-adapter-wagmi": "^1.8.19",
     "@tailwindcss/vite": "^4.2.4",
+    "@tanstack/react-query": "^5.100.7",
     "autoprefixer": "^10.5.0",
     "axios": "^1.15.2",
     "crypto-js": "^4.2.0",
@@ -24,6 +27,8 @@
     "postcss": "^8.5.12",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.2.4",
+    "viem": "^2.48.7",
+    "wagmi": "^3.6.9"
   }
 }
