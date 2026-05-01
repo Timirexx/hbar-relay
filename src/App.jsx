@@ -5,6 +5,7 @@ import GameCanvas from './components/GameCanvas';
 import TerminalUI from './components/TerminalUI';
 import WalletConnectNode from './components/WalletConnectNode';
 import LeaderboardModal from './components/LeaderboardModal';
+import { Box, Zap } from 'lucide-react';
 
 // Reown AppKit / Wagmi Imports
 import { createAppKit } from '@reown/appkit/react';
@@ -17,7 +18,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const queryClient = new QueryClient();
 
 // 2. Setup Project ID
-const projectId = import.meta.env.VITE_REOWN_PROJECT_ID;
+const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || 'f915729e246835150827299a941584c0';
 
 // 3. Setup Wagmi Adapter
 const networks = [hederaTestnet];
@@ -130,7 +131,7 @@ function AppContent() {
     if (isBooting) {
         return (
             <div className="fixed inset-0 bg-base-black flex items-center justify-center z-[500]">
-                <div className="text-light-purple font-black tracking-[0.5em] animate-pulse">HBAR_RELAY_v2.1_DUAL_CORE</div>
+                <div className="text-light-purple font-black tracking-[0.5em] animate-pulse">HBAR_RELAY_v2.1_REBOOTING...</div>
             </div>
         );
     }
@@ -191,5 +192,3 @@ export default function App() {
         </WagmiProvider>
     );
 }
-
-import { Box } from 'lucide-react';
