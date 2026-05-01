@@ -5,6 +5,7 @@ import GameCanvas from './components/GameCanvas';
 import TerminalUI from './components/TerminalUI';
 import WalletConnectNode from './components/WalletConnectNode';
 import LeaderboardModal from './components/LeaderboardModal';
+import WalletChoiceModal from './components/WalletChoiceModal';
 import { Box } from 'lucide-react';
 import { useDualWallet } from './hooks/useDualWallet';
 import { Web3Provider } from './providers/Web3Provider';
@@ -15,7 +16,8 @@ function AppContent() {
         isConnected, 
         payEntryFee, 
         balance,
-        openWalletModal 
+        openWalletModal,
+        connectNative
     } = useDualWallet();
 
     const [gameScore, setGameScore] = useState(0);
@@ -23,6 +25,7 @@ function AppContent() {
     const [starCount, setStarCount] = useState(0);
     const [isBooting, setIsBooting] = useState(true);
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+    const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
     const [isPaying, setIsPaying] = useState(false);
 
     useEffect(() => {
@@ -47,7 +50,6 @@ function AppContent() {
     }, [refreshLeaderboard]);
 
     const handleGameOver = useCallback(async (finalScore) => {
-        // Standard Scoring Logic
         if (finalScore > 0) {
             refreshLeaderboard();
         }
@@ -59,7 +61,7 @@ function AppContent() {
 
     const handleStartGame = async () => {
         if (!isConnected) {
-            openWalletModal();
+            setIsChoiceModalOpen(true);
             return;
         }
 
@@ -97,8 +99,8 @@ function AppContent() {
         return (
             <div className="fixed inset-0 bg-[#000000] flex items-center justify-center z-[10000]">
                 <div className="text-[#C084FC] font-black tracking-[0.5em] animate-pulse uppercase text-center">
-                    Initializing_Uplink_v4.0<br/>
-                    <span className="text-[10px] opacity-40 uppercase">Standard_Protocol_Active</span>
+                    Initializing_Uplink_v4.5<br/>
+                    <span className="text-[10px] opacity-40 uppercase">Dual_Protocol_Active</span>
                 </div>
             </div>
         );
@@ -115,7 +117,7 @@ function AppContent() {
                     </div>
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-none text-white">HBAR_RELAY</h1>
-                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">STANDARD_UPLINK_v4.0</p>
+                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">[TESTNET_UPLINK_v4.5]</p>
                     </div>
                 </div>
 
@@ -126,7 +128,7 @@ function AppContent() {
                     >
                         🏆 LEADERBOARD
                     </button>
-                    <WalletConnectNode />
+                    <WalletConnectNode onOpenChoice={() => setIsChoiceModalOpen(true)} />
                 </div>
             </header>
 
@@ -147,6 +149,13 @@ function AppContent() {
                 isOpen={isLeaderboardOpen} 
                 onClose={() => setIsLeaderboardOpen(false)} 
                 leaderboard={leaderboard}
+            />
+
+            <WalletChoiceModal 
+                isOpen={isChoiceModalOpen}
+                onClose={() => setIsChoiceModalOpen(false)}
+                onSelectEVM={openWalletModal}
+                onSelectNative={connectNative}
             />
         </div>
     );

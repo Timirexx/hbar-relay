@@ -1,43 +1,73 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useAccount, useBalance, useDisconnect, useSendTransaction } from 'wagmi';
 import { useAppKit } from '@reown/appkit/react';
+import { useHedera } from './useHedera';
 import { parseEther } from 'viem';
 
 export const useDualWallet = () => {
-    // Standard Wagmi / AppKit Hooks
-    const { address, isConnected } = useAccount();
-    const { data: balanceData } = useBalance({ address });
-    const { disconnect } = useDisconnect();
-    const { open } = useAppKit();
+    // 1. EVM (AppKit)
+    const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
+    const { data: evmBalanceData } = useBalance({ address: evmAddress });
+    const { disconnect: disconnectEvm } = useDisconnect();
+    const { open: openAppKit } = useAppKit();
     const { sendTransactionAsync } = useSendTransaction();
 
-    // Standardized Balance Formatting
-    const formattedBalance = useMemo(() => {
-        if (isConnected && balanceData) {
-            const val = parseFloat(balanceData.formatted);
+    // 2. Native (HashConnect)
+    const { 
+        connected: isNativeConnected, 
+        accountId: nativeAddress, 
+        disconnect: disconnectNative,
+        connect: connectNative,
+        isConnecting: isNativeConnecting,
+        initiateEntryFee,
+        reportScore
+    } = useHedera();
+
+    // 3. Unified State
+    const isConnected = isEvmConnected || isNativeConnected;
+    const walletType = isEvmConnected ? 'evm' : (isNativeConnected ? 'native' : null);
+    const address = isEvmConnected ? evmAddress : nativeAddress;
+
+    const balance = useMemo(() => {
+        if (isEvmConnected && evmBalanceData) {
+            const val = parseFloat(evmBalanceData.formatted);
             return `${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} HBAR`;
         }
+        if (isNativeConnected) return "SYNCED";
         return "0.00 HBAR";
-    }, [balanceData, isConnected]);
+    }, [evmBalanceData, isEvmConnected, isNativeConnected]);
 
-    // Standard Transaction Logic
+    // 4. Robust Actions
+    const openWalletModal = useCallback(() => {
+        console.log("UPLINK // TRIGGERING_REOWN_MODAL");
+        if (openAppKit) openAppKit();
+    }, [openAppKit]);
+
+    const disconnectWallet = useCallback(() => {
+        if (isEvmConnected) disconnectEvm();
+        if (isNativeConnected) disconnectNative();
+    }, [isEvmConnected, isNativeConnected, disconnectEvm, disconnectNative]);
+
     const payEntryFee = async () => {
-        if (!isConnected) throw new Error("Wallet not connected");
-        
-        // Treasury Address (Example Alias for 0.0.8665538)
-        return await sendTransactionAsync({
-            to: '0x0000000000000000000000000000000000843922',
-            value: parseEther('0.0001'), 
-        });
+        if (isEvmConnected) {
+            return await sendTransactionAsync({
+                to: '0x0000000000000000000000000000000000843922',
+                value: parseEther('0.0001'), 
+            });
+        }
+        return await initiateEntryFee();
     };
 
     return {
-        openWalletModal: () => open(),
-        disconnectWallet: () => disconnect(),
-        payEntryFee,
         isConnected,
         address,
-        balance: formattedBalance,
-        walletType: 'evm' // Now strictly standard EVM/AppKit
+        balance,
+        walletType,
+        openWalletModal,
+        connectNative,
+        disconnectWallet,
+        payEntryFee,
+        submitScore: isNativeConnected ? reportScore : (score) => console.log("EVM_SCORE:", score),
+        isNativeConnecting
     };
 };

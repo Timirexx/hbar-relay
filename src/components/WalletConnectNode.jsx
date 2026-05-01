@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { Wallet, ChevronDown, Copy, RefreshCw, LogOut, Box, Zap } from 'lucide-react';
+import { Wallet, ChevronDown, Copy, RefreshCw, LogOut, Box } from 'lucide-react';
 import { useDualWallet } from '../hooks/useDualWallet';
 
-const WalletConnectNode = () => {
+const WalletConnectNode = ({ onOpenChoice }) => {
     const { 
         isConnected, 
         address, 
         balance, 
-        disconnectWallet, 
-        openWalletModal 
+        disconnectWallet 
     } = useDualWallet();
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -18,8 +17,8 @@ const WalletConnectNode = () => {
         return (
             <button 
                 onClick={() => {
-                    console.log("HBAR_RELAY // BUTTON_CLICKED // ATTEMPTING_OPEN");
-                    openWalletModal();
+                    console.log("HBAR_RELAY // OPENING_CHOICE_MODAL");
+                    onOpenChoice();
                 }}
                 className="group bg-[#2A1B3D] text-white px-8 py-4 rounded-2xl flex items-center gap-3 font-black tracking-widest text-sm uppercase transition-all duration-300 shadow-tactile border-t border-white/10 hover:scale-105 hover:bg-[#3D2759] active:translate-y-1 active:shadow-inner animate-pulse-glow"
             >
@@ -71,7 +70,7 @@ const WalletConnectNode = () => {
                         onClick={() => {
                             disconnectWallet();
                             setDropdownOpen(false);
-                            openWalletModal();
+                            onOpenChoice();
                         }}
                         className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#C084FC]/10 text-xs font-bold text-white transition-all"
                     >
