@@ -93,8 +93,13 @@ export const useDualWallet = () => {
         if (isNativeConnected) disconnectNative();
     };
 
+    const openWalletModal = () => {
+        console.log("HBAR_RELAY // OPENING_REOWN_APPKIT_MODAL");
+        openAppKit();
+    };
+
     return {
-        openWalletModal: () => openAppKit(),
+        openWalletModal,
         disconnectWallet,
         payEntryFee,
         submitScore,

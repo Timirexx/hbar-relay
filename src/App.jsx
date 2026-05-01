@@ -63,7 +63,9 @@ function AppContent() {
     const { update, flipGravity, resetGame, gameState } = useGameLoop(handleGameOver, handleScoreUpdate);
 
     const handleStartGame = async () => {
+        console.log("HBAR_RELAY // TRIGGERING_UPLINK_SEQUENCE");
         if (!isConnected) {
+            console.log("HBAR_RELAY // NO_CONNECTION_DETECTED // OPENING_CHOICE_MODAL");
             setIsChoiceModalOpen(true);
             return;
         }
