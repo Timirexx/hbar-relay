@@ -7,14 +7,20 @@ import WalletConnectNode from './components/WalletConnectNode';
 import LeaderboardModal from './components/LeaderboardModal';
 import WalletChoiceModal from './components/WalletChoiceModal';
 import { Box } from 'lucide-react';
-import { useAppKit } from '@reown/appkit/react';
 import { useDualWallet } from './hooks/useDualWallet';
 import { Web3Provider } from './providers/Web3Provider';
 
 function AppContent() {
-    const { reportScore, claimDailyStars, fetchLeaderboard } = useHedera();
-    const { connectNative } = useDualWallet();
-    const { open: openAppKit } = useAppKit();
+    const { fetchLeaderboard } = useHedera();
+    const { 
+        isConnected, 
+        walletType, 
+        payEntryFee, 
+        submitScore, 
+        claimStars,
+        openWalletModal,
+        connectNative
+    } = useDualWallet();
 
     const [gameScore, setGameScore] = useState(0);
     const [leaderboard, setLeaderboard] = useState([]);
@@ -22,6 +28,7 @@ function AppContent() {
     const [isBooting, setIsBooting] = useState(true);
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
     const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
+    const [isPaying, setIsPaying] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => setIsBooting(false), 2000);
@@ -35,7 +42,7 @@ function AppContent() {
 
     const refreshLeaderboard = useCallback(async () => {
         const data = await fetchLeaderboard();
-        setLeaderboard(data);
+        if (data) setLeaderboard(data);
     }, [fetchLeaderboard]);
 
     useEffect(() => {
@@ -44,24 +51,39 @@ function AppContent() {
         return () => clearInterval(interval);
     }, [refreshLeaderboard]);
 
-    const handleGameOver = useCallback((finalScore) => {
+    const handleGameOver = useCallback(async (finalScore) => {
         if (finalScore > 0) {
-            reportScore(finalScore).then(() => refreshLeaderboard());
+            await submitScore(finalScore);
+            refreshLeaderboard();
         }
-    }, [reportScore, refreshLeaderboard]);
+    }, [submitScore, refreshLeaderboard]);
 
     const handleScoreUpdate = useCallback((score) => setGameScore(score), []);
 
     const { update, flipGravity, resetGame, gameState } = useGameLoop(handleGameOver, handleScoreUpdate);
 
     const handleStartGame = async () => {
-        setGameScore(0);
-        resetGame();
+        if (!isConnected) {
+            setIsChoiceModalOpen(true);
+            return;
+        }
+
+        try {
+            setIsPaying(true);
+            await payEntryFee();
+            setGameScore(0);
+            resetGame();
+        } catch (error) {
+            console.error("Payment failed:", error);
+            alert("Entry Fee Transaction Required to Relay.");
+        } finally {
+            setIsPaying(false);
+        }
     };
 
     const handleClaim = async () => {
         try {
-            const success = await claimDailyStars();
+            const success = await claimStars();
             if (success) {
                 const newCount = starCount + 50;
                 setStarCount(newCount);
@@ -94,7 +116,7 @@ function AppContent() {
         return (
             <div className="fixed inset-0 bg-[#000000] flex items-center justify-center z-[10000]">
                 <div className="text-[#C084FC] font-black tracking-[0.5em] animate-pulse uppercase">
-                    Initializing_Uplink_v3.0
+                    Initializing_Uplink_v3.1
                 </div>
             </div>
         );
@@ -111,7 +133,7 @@ function AppContent() {
                     </div>
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-none text-white">HBAR_RELAY</h1>
-                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">MODULAR_WEB3_ENGINE_v3</p>
+                        <p className="text-[10px] text-[#C084FC] font-bold tracking-widest uppercase opacity-60">TRANSACTIONAL_UPLINK_v3.1</p>
                     </div>
                 </div>
 
@@ -134,6 +156,8 @@ function AppContent() {
                     onClaimStars={handleClaim}
                     starCount={starCount}
                     leaderboard={leaderboard}
+                    connected={isConnected}
+                    isPaying={isPaying}
                 />
             </main>
 
@@ -146,7 +170,7 @@ function AppContent() {
             <WalletChoiceModal 
                 isOpen={isChoiceModalOpen}
                 onClose={() => setIsChoiceModalOpen(false)}
-                onSelectEVM={() => openAppKit()}
+                onSelectEVM={() => openWalletModal()}
                 onSelectNative={connectNative}
             />
         </div>
