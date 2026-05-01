@@ -58,20 +58,24 @@
     box-shadow: 0 0px 0px #2E1065;
   }
 
-  /* Floating Animation */
-  .float-ui {
-    animation: float 4s ease-in-out infinite;
+  /* Tactile 3D Raised Button */
+  .shadow-tactile {
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.2),
+      0 4px 6px rgba(0, 0, 0, 0.3),
+      0 10px 20px rgba(0, 0, 0, 0.2);
   }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+  /* Carved Inset Row */
+  .shadow-carved {
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.4),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05);
   }
 
-  /* Glossy Reflections */
-  .gloss-layer {
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
-    pointer-events: none;
-    border-radius: inherit;
+  /* Elevated Glow Border */
+  .glow-border-purple {
+    border: 2px solid #C084FC;
+    box-shadow: 0 0 15px rgba(192, 132, 252, 0.4), inset 0 0 10px rgba(192, 132, 252, 0.2);
   }
 }

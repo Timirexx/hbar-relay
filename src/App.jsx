@@ -4,7 +4,8 @@ import { useGameLoop } from './hooks/useGameLoop';
 import GameCanvas from './components/GameCanvas';
 import TerminalUI from './components/TerminalUI';
 import WalletConnect from './components/WalletConnect';
-import { Zap, Activity, Cpu, Shield } from 'lucide-react';
+import { Zap, Activity, Cpu, Shield, Trophy } from 'lucide-react';
+import LeaderboardModal from './components/LeaderboardModal';
 
 function App() {
     const { 
@@ -26,6 +27,7 @@ function App() {
     const [starCount, setStarCount] = useState(0);
     const [isBooting, setIsBooting] = useState(true);
     const [bootLogs, setBootLogs] = useState([]);
+    const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
 
     // Boot Sequence Simulation
     useEffect(() => {
@@ -193,14 +195,24 @@ function App() {
                     </div>
                 </div>
 
-                <div className="card-3d-tilt">
-                    <WalletConnect 
-                        connected={connected}
-                        accountId={accountId}
-                        onConnect={connect}
-                        onDisconnect={disconnect}
-                        isConnecting={isConnecting}
-                    />
+                <div className="flex flex-col items-end gap-6">
+                    {/* LEADERBOARD TRIGGER */}
+                    <button 
+                        onClick={() => setIsLeaderboardOpen(true)}
+                        className="bg-[#2A1B3D] text-white px-6 py-3 rounded-xl shadow-tactile border-t border-white/10 flex items-center gap-2 font-black italic text-xs uppercase tracking-widest hover:scale-105 hover:bg-[#3D2759] hover:shadow-[0_0_20px_rgba(192,132,252,0.4)] transition-all card-3d-tilt"
+                    >
+                        <Trophy size={16} /> Leaderboard
+                    </button>
+
+                    <div className="card-3d-tilt">
+                        <WalletConnect 
+                            connected={connected}
+                            accountId={accountId}
+                            onConnect={connect}
+                            onDisconnect={disconnect}
+                            isConnecting={isConnecting}
+                        />
+                    </div>
                 </div>
             </header>
 
@@ -251,6 +263,13 @@ function App() {
                     DATA_EXTRACT_PROTOCOL_v1.2.4_READY
                 </div>
             </footer>
+
+            <LeaderboardModal 
+                isOpen={isLeaderboardOpen} 
+                onClose={() => setIsLeaderboardOpen(false)} 
+                accountId={accountId}
+                leaderboard={leaderboard}
+            />
         </div>
     );
 }
