@@ -2,7 +2,7 @@ import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { hederaTestnet } from '@reown/appkit/networks';
 
-// 1. Get Project ID (Hardcoded for stability)
+// 1. Get Project ID
 export const projectId = '2160ca9430a349cd96add67c48161dd4';
 
 // 2. Define Networks
@@ -14,7 +14,7 @@ export const wagmiAdapter = new WagmiAdapter({
     networks
 });
 
-// 4. Initialize AppKit IMMEDIATELY
+// 4. Initialize AppKit Instance (Singleton)
 export const appkitInstance = createAppKit({
     adapters: [wagmiAdapter],
     networks,

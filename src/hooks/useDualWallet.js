@@ -1,23 +1,22 @@
 import { useMemo, useCallback } from 'react';
 import { useAccount, useBalance, useDisconnect, useSendTransaction } from 'wagmi';
-import { useAppKit } from '@reown/appkit/react';
 import { useHedera } from './useHedera';
 import { parseEther } from 'viem';
+import { appkitInstance } from '../config/appkit';
+import { hcInstance } from '../config/hashconnect';
 
 export const useDualWallet = () => {
-    // 1. EVM (AppKit)
+    // 1. EVM (Standard Wagmi)
     const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
     const { data: evmBalanceData } = useBalance({ address: evmAddress });
     const { disconnect: disconnectEvm } = useDisconnect();
-    const { open: openAppKit } = useAppKit();
     const { sendTransactionAsync } = useSendTransaction();
 
-    // 2. Native (HashConnect)
+    // 2. Native (Refined useHedera)
     const { 
         connected: isNativeConnected, 
         accountId: nativeAddress, 
         disconnect: disconnectNative,
-        connect: connectNative,
         isConnecting: isNativeConnecting,
         initiateEntryFee,
         reportScore
@@ -37,11 +36,18 @@ export const useDualWallet = () => {
         return "0.00 HBAR";
     }, [evmBalanceData, isEvmConnected, isNativeConnected]);
 
-    // 4. Robust Actions
+    // 4. Hyper-Link Actions (Direct Singletons)
     const openWalletModal = useCallback(() => {
-        console.log("UPLINK // TRIGGERING_REOWN_MODAL");
-        if (openAppKit) openAppKit();
-    }, [openAppKit]);
+        console.log("UPLINK // TRIGGERING_DIRECT_APPKIT_HANDSHAKE");
+        // Direct call to singleton bypassing hooks
+        appkitInstance.open();
+    }, []);
+
+    const connectNative = useCallback(async () => {
+        console.log("UPLINK // TRIGGERING_DIRECT_HASHPACK_HANDSHAKE");
+        // Direct call to singleton
+        await hcInstance.connectToLocalWallet();
+    }, []);
 
     const disconnectWallet = useCallback(() => {
         if (isEvmConnected) disconnectEvm();
