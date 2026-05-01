@@ -93,3 +93,15 @@
     animation: slide-down 0.3s ease-out forwards;
   }
 }
+
+/* Reown AppKit Z-Index Override */
+w3m-modal, 
+appkit-modal, 
+#w3m-modal {
+  z-index: 99999 !important;
+  position: relative;
+}
+
+.w3m-overlay {
+  z-index: 99998 !important;
+}
